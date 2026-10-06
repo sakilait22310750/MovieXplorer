@@ -34,6 +34,11 @@ export const lightTheme = createTheme({
         root: { borderRadius: 6, textTransform: 'none', fontWeight: 700 },
       },
     },
+    MuiAppBar: {
+      styleOverrides: {
+        root: { backgroundColor: '#ffffff', color: '#111111', borderBottom: '1px solid #e0e0e0' },
+      },
+    },
   },
 });
 

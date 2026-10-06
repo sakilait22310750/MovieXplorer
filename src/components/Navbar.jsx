@@ -78,12 +78,12 @@ export default function Navbar() {
                   onClick={() => navigate(link.path)}
                   size="small"
                   sx={{
-                    color: isActive(link.path) ? '#fff' : '#aaa',
+                    color: isActive(link.path) ? 'text.primary' : 'text.secondary',
                     fontWeight: isActive(link.path) ? 700 : 400,
                     borderBottom: isActive(link.path) ? '2px solid #E5A00D' : '2px solid transparent',
                     borderRadius: 0,
                     px: 1.5,
-                    '&:hover': { color: '#fff', bgcolor: 'transparent' },
+                    '&:hover': { color: 'text.primary', bgcolor: 'transparent' },
                   }}
                 >
                   {link.label}
@@ -97,17 +97,17 @@ export default function Navbar() {
 {/* Dark Mode Toggle */}
           <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 0.5 }}>
-              <LightMode fontSize="small" sx={{ color: '#aaa' }} />
+              <LightMode fontSize="small" sx={{ color: 'text.secondary' }} />
               <Switch
                 checked={darkMode}
                 onChange={toggleDarkMode}
                 size="small"
                 sx={{
                   '& .MuiSwitch-thumb': { bgcolor: '#E5A00D' },
-                  '& .MuiSwitch-track': { bgcolor: '#555' },
+                  '& .MuiSwitch-track': { bgcolor: theme.palette.mode === 'dark' ? '#555' : '#ccc' },
                 }}
               />
-              <DarkMode fontSize="small" sx={{ color: '#aaa' }} />
+              <DarkMode fontSize="small" sx={{ color: 'text.secondary' }} />
             </Box>
           </Tooltip>
 
@@ -132,14 +132,14 @@ export default function Navbar() {
                       anchorEl={anchorEl}
                       open={Boolean(anchorEl)}
                       onClose={handleMenuClose}
-                      PaperProps={{ sx: { bgcolor: '#1a1a1a', color: '#fff', border: '1px solid #333' } }}
+                      PaperProps={{ sx: { bgcolor: 'background.paper', color: 'text.primary', border: '1px solid', borderColor: 'divider' } }}
                     >
                       <MenuItem onClick={() => { handleMenuClose(); navigate('/favorites'); }}>
                         <ListItemIcon><FavoriteIcon fontSize="small" sx={{ color: '#E5A00D' }} /></ListItemIcon>
                         <ListItemText>Favorites</ListItemText>
                       </MenuItem>
                       <MenuItem onClick={() => { handleMenuClose(); logout(); navigate('/'); }}>
-                        <ListItemIcon><LoginIcon fontSize="small" sx={{ color: '#ccc' }} /></ListItemIcon>
+                        <ListItemIcon><LoginIcon fontSize="small" sx={{ color: 'text.secondary' }} /></ListItemIcon>
                         <ListItemText>Logout</ListItemText>
                       </MenuItem>
                     </Menu>
@@ -151,7 +151,7 @@ export default function Navbar() {
                     startIcon={<LoginIcon />}
                     onClick={() => openAuth('login')}
                     size="small"
-                    sx={{ color: '#ccc', '&:hover': { color: '#fff' } }}
+                    sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
                   >
                     Sign In
                   </Button>
@@ -182,7 +182,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}
-        PaperProps={{ sx: { bgcolor: '#1a1a1a', width: 230 } }}>
+        PaperProps={{ sx: { bgcolor: 'background.paper', width: 230 } }}>
         <Box sx={{ pt: 2 }}>
           <List>
             {navLinks.map((link) => (
@@ -199,7 +199,7 @@ export default function Navbar() {
                 </ListItemButton>
               </ListItem>
             ))}
-            <Divider sx={{ my: 1, borderColor: '#333' }} />
+            <Divider sx={{ my: 1, borderColor: 'divider' }} />
             <ListItem disablePadding sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
               {currentUser ? (
                 <>
