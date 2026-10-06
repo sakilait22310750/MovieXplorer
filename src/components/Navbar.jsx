@@ -11,7 +11,6 @@ import {
   Login as LoginIcon,
   Menu as MenuIcon,
   Person as PersonIcon,
-  Search as SearchIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
@@ -95,16 +94,7 @@ export default function Navbar() {
 
           {isMobile && <Box sx={{ flexGrow: 1 }} />}
 
-          {/* Search icon */}
-          {!isMobile && (
-            <Tooltip title="Search">
-              <IconButton color="inherit" onClick={() => navigate('/')} sx={{ color: '#aaa', '&:hover': { color: '#fff' } }}>
-                <SearchIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-
-          {/* Dark Mode Toggle */}
+{/* Dark Mode Toggle */}
           <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 0.5 }}>
               <LightMode fontSize="small" sx={{ color: '#aaa' }} />

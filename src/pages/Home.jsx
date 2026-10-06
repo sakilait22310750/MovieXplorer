@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Typography, Divider, Button } from '@mui/material';
-import { PlayArrow as PlayIcon } from '@mui/icons-material';
+import { Container, Box, Typography, Divider } from '@mui/material';
 import SearchBar from '../components/SearchBar';
 import TrendingSection from '../components/TrendingSection';
 import MovieGrid from '../components/MovieGrid';
@@ -116,32 +115,17 @@ export default function Home() {
             <Typography
               variant="h3"
               fontWeight={900}
-              lineHeight={1.15}
-              sx={{ color: '#fff', mb: 2, fontSize: { xs: '2rem', md: '2.6rem' } }}
-            >
-              Free Movies Online, Watch Anytime Anywhere.
-            </Typography>
-            <Typography variant="body1" sx={{ color: '#bbb', mb: 4, maxWidth: 420 }}>
-              Discover millions of movies, explore trending titles, and save your favorites — all in one place.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<PlayIcon />}
-              sx={{
-                bgcolor: '#E5A00D',
-                color: '#000',
-                fontWeight: 800,
-                px: 4,
-                py: 1.4,
-                fontSize: '1rem',
-                borderRadius: 2,
-                '&:hover': { bgcolor: '#C8880A' },
+              lineHeight={1.2}
+              sx={{ 
+                color: '#fff', 
+                mb: 2, 
+                fontSize: { xs: '2rem', md: '3rem' },
+                fontFamily: '"Georgia", "Times New Roman", serif',
+                letterSpacing: '0.5px'
               }}
-              onClick={() => document.getElementById('search-section')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Explore Free
-            </Button>
+              Discover millions of movies, explore trending titles, and save your favorites.
+            </Typography>
           </Box>
         </Container>
       </Box>
