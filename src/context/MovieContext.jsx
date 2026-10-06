@@ -3,20 +3,28 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 const MovieContext = createContext();
 
 export const MovieProvider = ({ children }) => {
+  // Authentication state
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('currentUser')) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Favorites list - persisted per user
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('currentUser')) || null;
+      return user ? (JSON.parse(localStorage.getItem(`favorites_${user.username}`)) || []) : [];
+    } catch {
+      return [];
+    }
+  });
+
   // Dark mode — persisted
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem('darkMode') === 'true'
-  );
-
-  // Favorites list — persisted
-  const [favorites, setFavorites] = useState(
-    () => {
-      try {
-        return JSON.parse(localStorage.getItem('favorites')) || [];
-      } catch {
-        return [];
-      }
-    }
   );
 
   // Last search query — persisted
@@ -33,15 +41,20 @@ export const MovieProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Sync favorites when user changes
+  useEffect(() => {
+    if (currentUser) {
+      const userFavs = JSON.parse(localStorage.getItem(`favorites_${currentUser.username}`)) || [];
+      setFavorites(userFavs);
+    } else {
+      setFavorites([]);
+    }
+  }, [currentUser]);
+
   // Persist dark mode
   useEffect(() => {
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
-
-  // Persist favorites
-  useEffect(() => {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }, [favorites]);
 
   // Persist last search
   useEffect(() => {
@@ -52,6 +65,13 @@ export const MovieProvider = ({ children }) => {
 
   // Toggle dark mode
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
+
+  // Persist favorites
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(`favorites_${currentUser.username}`, JSON.stringify(favorites));
+    }
+  }, [favorites, currentUser]);
 
   // Add/remove favorites
   const toggleFavorite = useCallback((movie) => {
@@ -66,15 +86,6 @@ export const MovieProvider = ({ children }) => {
     (id) => favorites.some((m) => m.id === id),
     [favorites]
   );
-
-  // Authentication state
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('currentUser')) || null;
-    } catch {
-      return null;
-    }
-  });
 
   const register = (email, username, password) => {
     try {

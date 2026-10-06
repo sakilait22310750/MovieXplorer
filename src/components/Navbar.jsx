@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Switch,
-  Button, Tooltip, useMediaQuery,
+  Button, Tooltip, useMediaQuery, Menu, MenuItem,
   Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider,
 } from '@mui/material';
 import {
@@ -27,14 +27,22 @@ export default function Navbar() {
 
   const [authMode, setAuthMode] = useState(null); // 'login', 'register', null
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const openAuth = (mode) => {
     setAuthMode(mode);
   };
 
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   const navLinks = [
     { label: 'Home', path: '/', icon: <HomeIcon fontSize="small" /> },
-    { label: 'Favorites', path: '/favorites', icon: <FavoriteIcon fontSize="small" /> },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -117,28 +125,36 @@ export default function Navbar() {
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 1, ml: 1 }}>
               {currentUser ? (
-                <>
-                  <Button
-                    variant="outlined"
-                    startIcon={<PersonIcon />}
-                    size="small"
-                    sx={{
-                      borderColor: '#E5A00D', color: '#E5A00D',
-                      '&:hover': { borderColor: '#C8880A', color: '#C8880A' },
-                    }}
-                  >
-                    {currentUser.username}
-                  </Button>
-                  <Button
-                    variant="text"
-                    onClick={logout}
-                    size="small"
-                    sx={{ color: '#ccc', '&:hover': { color: '#fff' } }}
-                  >
-                    Logout
-                  </Button>
-                </>
-              ) : (
+                  <>
+                    <Button
+                      variant="outlined"
+                      startIcon={<PersonIcon />}
+                      size="small"
+                      onClick={handleMenuOpen}
+                      sx={{
+                        borderColor: '#E5A00D', color: '#E5A00D',
+                        '&:hover': { borderColor: '#C8880A', color: '#C8880A' },
+                      }}
+                    >
+                      {currentUser.username}
+                    </Button>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                      PaperProps={{ sx: { bgcolor: '#1a1a1a', color: '#fff', border: '1px solid #333' } }}
+                    >
+                      <MenuItem onClick={() => { handleMenuClose(); navigate('/favorites'); }}>
+                        <ListItemIcon><FavoriteIcon fontSize="small" sx={{ color: '#E5A00D' }} /></ListItemIcon>
+                        <ListItemText>Favorites</ListItemText>
+                      </MenuItem>
+                      <MenuItem onClick={() => { handleMenuClose(); logout(); navigate('/'); }}>
+                        <ListItemIcon><LoginIcon fontSize="small" sx={{ color: '#ccc' }} /></ListItemIcon>
+                        <ListItemText>Logout</ListItemText>
+                      </MenuItem>
+                    </Menu>
+                  </>
+                ) : (
                 <>
                   <Button
                     variant="text"
@@ -194,12 +210,18 @@ export default function Navbar() {
               </ListItem>
             ))}
             <Divider sx={{ my: 1, borderColor: '#333' }} />
-            <ListItem disablePadding>
+            <ListItem disablePadding sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
               {currentUser ? (
-                <ListItemButton onClick={() => { logout(); setDrawerOpen(false); }}>
-                  <ListItemIcon><PersonIcon /></ListItemIcon>
-                  <ListItemText primary={`Logout (${currentUser.username})`} />
-                </ListItemButton>
+                <>
+                  <ListItemButton onClick={() => { navigate('/favorites'); setDrawerOpen(false); }}>
+                    <ListItemIcon><FavoriteIcon sx={{ color: '#E5A00D' }} /></ListItemIcon>
+                    <ListItemText primary="Favorites" />
+                  </ListItemButton>
+                  <ListItemButton onClick={() => { logout(); setDrawerOpen(false); }}>
+                    <ListItemIcon><LoginIcon /></ListItemIcon>
+                    <ListItemText primary="Logout" />
+                  </ListItemButton>
+                </>
               ) : (
                 <ListItemButton onClick={() => { openAuth('login'); setDrawerOpen(false); }}>
                   <ListItemIcon><LoginIcon /></ListItemIcon>
