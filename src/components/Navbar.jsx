@@ -3,7 +3,7 @@ import {
   AppBar, Toolbar, Typography, Box, IconButton, Switch,
   Button, Tooltip, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, InputAdornment, useMediaQuery,
-  Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
+  Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider,
 } from '@mui/material';
 import {
   DarkMode, LightMode,
