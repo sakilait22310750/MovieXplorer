@@ -76,34 +76,37 @@ export const MovieProvider = ({ children }) => {
     }
   });
 
-  const register = (username, password) => {
+  const register = (email, username, password) => {
     try {
       const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+        return { success: false, message: 'Email already exists' };
+      }
       if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
         return { success: false, message: 'Username already exists' };
       }
-      const newUser = { username, password }; // Note: Passwords should be hashed in production
+      const newUser = { email, username, password };
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
       
-      setCurrentUser({ username });
-      localStorage.setItem('currentUser', JSON.stringify({ username }));
+      setCurrentUser({ username, email });
+      localStorage.setItem('currentUser', JSON.stringify({ username, email }));
       return { success: true };
     } catch (err) {
       return { success: false, message: 'Registration failed' };
     }
   };
 
-  const login = (username, password) => {
+  const login = (email, password) => {
     try {
       const users = JSON.parse(localStorage.getItem('users')) || [];
-      const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
       if (user) {
-        setCurrentUser({ username: user.username });
-        localStorage.setItem('currentUser', JSON.stringify({ username: user.username }));
+        setCurrentUser({ username: user.username, email: user.email });
+        localStorage.setItem('currentUser', JSON.stringify({ username: user.username, email: user.email }));
         return { success: true };
       }
-      return { success: false, message: 'Invalid username or password' };
+      return { success: false, message: 'Invalid email or password' };
     } catch (err) {
       return { success: false, message: 'Login failed' };
     }

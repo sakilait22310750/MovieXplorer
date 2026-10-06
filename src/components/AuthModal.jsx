@@ -20,7 +20,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
 
   const [posterIndex, setPosterIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
-  const [authForm, setAuthForm] = useState({ email: '', password: '' });
+  const [authForm, setAuthForm] = useState({ email: '', username: '', password: '' });
   const [authError, setAuthError] = useState('');
 
   // Auto-change poster
@@ -34,23 +34,24 @@ export default function AuthModal({ authMode, setAuthMode }) {
 
   const handleClose = () => {
     setAuthMode(null);
-    setAuthForm({ email: '', password: '' });
+    setAuthForm({ email: '', username: '', password: '' });
     setAuthError('');
   };
 
+  const isLogin = authMode === 'login';
+
   const handleSubmit = () => {
     setAuthError('');
-    if (!authForm.email || !authForm.password) {
+    if (!authForm.email || !authForm.password || (!isLogin && !authForm.username)) {
       setAuthError('Please fill in all fields');
       return;
     }
     
-    // Using email as the username internally in our context
     let result;
-    if (authMode === 'login') {
+    if (isLogin) {
       result = login(authForm.email, authForm.password);
     } else {
-      result = register(authForm.email, authForm.password);
+      result = register(authForm.email, authForm.username, authForm.password);
     }
 
     if (result.success) {
@@ -60,9 +61,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
     }
   };
 
-  const isLogin = authMode === 'login';
-
-  return (
+    return (
     <Dialog 
       open={!!authMode} 
       onClose={handleClose} 
@@ -174,6 +173,18 @@ export default function AuthModal({ authMode, setAuthMode }) {
           variant="standard"
           sx={{ '& .MuiInput-underline:after': { borderBottomColor: '#E5A00D' } }}
         />
+
+        {!isLogin && (
+          <TextField
+            label="Username"
+            value={authForm.username}
+            onChange={(e) => setAuthForm({ ...authForm, username: e.target.value })}
+            fullWidth
+            margin="normal"
+            variant="standard"
+            sx={{ '& .MuiInput-underline:after': { borderBottomColor: '#E5A00D' } }}
+          />
+        )}
 
         <TextField
           label={isLogin ? "Password" : "Create password"}
