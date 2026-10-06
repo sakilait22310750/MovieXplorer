@@ -79,10 +79,10 @@ export const MovieProvider = ({ children }) => {
   const register = (email, username, password) => {
     try {
       const users = JSON.parse(localStorage.getItem('users')) || [];
-      if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+      if (users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase())) {
         return { success: false, message: 'Email already exists' };
       }
-      if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+      if (users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase())) {
         return { success: false, message: 'Username already exists' };
       }
       const newUser = { email, username, password };
@@ -100,7 +100,7 @@ export const MovieProvider = ({ children }) => {
   const login = (email, password) => {
     try {
       const users = JSON.parse(localStorage.getItem('users')) || [];
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+      const user = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase() && u.password === password);
       if (user) {
         setCurrentUser({ username: user.username, email: user.email });
         localStorage.setItem('currentUser', JSON.stringify({ username: user.username, email: user.email }));
