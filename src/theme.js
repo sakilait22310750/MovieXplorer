@@ -1,12 +1,15 @@
 import { createTheme } from '@mui/material/styles';
 
+const PLEX_YELLOW = '#E5A00D';
+const PLEX_YELLOW_DARK = '#C8880A';
+
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#e50914' },
-    secondary: { main: '#f5c518' },
+    primary: { main: PLEX_YELLOW, dark: PLEX_YELLOW_DARK, contrastText: '#000' },
+    secondary: { main: '#1a1a1a' },
     background: {
-      default: '#f5f5f5',
+      default: '#f0f0f0',
       paper: '#ffffff',
     },
   },
@@ -17,18 +20,18 @@ export const lightTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 8,
           transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-6px)',
-            boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+            transform: 'translateY(-6px) scale(1.02)',
+            boxShadow: `0 12px 30px rgba(229,160,13,0.35)`,
           },
         },
       },
     },
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 8 },
+        root: { borderRadius: 6, textTransform: 'none', fontWeight: 700 },
       },
     },
   },
@@ -37,15 +40,15 @@ export const lightTheme = createTheme({
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    primary: { main: '#e50914' },
-    secondary: { main: '#f5c518' },
+    primary: { main: PLEX_YELLOW, dark: PLEX_YELLOW_DARK, contrastText: '#000' },
+    secondary: { main: '#cccccc' },
     background: {
-      default: '#0d0d0d',
-      paper: '#1a1a1a',
+      default: '#111111',
+      paper: '#1f1f1f',
     },
     text: {
       primary: '#ffffff',
-      secondary: '#b3b3b3',
+      secondary: '#999999',
     },
   },
   typography: {
@@ -55,24 +58,24 @@ export const darkTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          backgroundColor: '#1a1a1a',
+          borderRadius: 8,
+          backgroundColor: '#1f1f1f',
           transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-6px)',
-            boxShadow: '0 12px 30px rgba(229,9,20,0.25)',
+            transform: 'translateY(-6px) scale(1.02)',
+            boxShadow: `0 12px 30px rgba(229,160,13,0.4)`,
           },
         },
       },
     },
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 8 },
+        root: { borderRadius: 6, textTransform: 'none', fontWeight: 700 },
       },
     },
     MuiAppBar: {
       styleOverrides: {
-        root: { backgroundColor: '#0d0d0d' },
+        root: { backgroundColor: '#111111', borderBottom: '1px solid #2a2a2a' },
       },
     },
   },

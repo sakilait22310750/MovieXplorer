@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, TextField, IconButton, InputAdornment, FormControl,
   Select, MenuItem, InputLabel, Chip, Tooltip, Collapse,
-  Button,
+  Button, Autocomplete, CircularProgress, Typography
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -10,7 +10,7 @@ import {
   FilterList as FilterIcon,
   TuneOutlined as TuneIcon,
 } from '@mui/icons-material';
-import { searchMovies, getGenres } from '../api/tmdb';
+import { searchMovies, getGenres, getImageUrl } from '../api/tmdb';
 import { useMovie } from '../context/MovieContext';
 
 export default function SearchBar() {
@@ -26,6 +26,12 @@ export default function SearchBar() {
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedRating, setSelectedRating] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Suggestion states
+  const [suggestions, setSuggestions] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
   const inputRef = useRef();
 
   // Load genres on mount
@@ -35,6 +41,27 @@ export default function SearchBar() {
       .catch(() => {});
   }, []);
 
+  // Debounced fetch for search suggestions
+  useEffect(() => {
+    if (!query || !query.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setLoadingSuggestions(true);
+      try {
+        const res = await searchMovies(query.trim(), 1);
+        setSuggestions(res.data.results?.slice(0, 5) || []); // Top 5 suggestions
+      } catch (err) {
+        // handle silently for suggestions
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const doSearch = async (q = query, page = 1) => {
     const trimmed = q.trim();
     if (!trimmed) return;
@@ -42,6 +69,7 @@ export default function SearchBar() {
     setSearchLoading(true);
     setSearchError('');
     setLastSearch(trimmed);
+    setOpen(false); // Close suggestions on actual search
 
     try {
       const res = await searchMovies(trimmed, page);
@@ -76,6 +104,7 @@ export default function SearchBar() {
 
   const handleClear = () => {
     setQuery('');
+    setSuggestions([]);
     setSearchResults([]);
     setLastSearch('');
     setSelectedGenre('');
@@ -91,48 +120,116 @@ export default function SearchBar() {
   return (
     <Box sx={{ mb: 3 }}>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-        <TextField
-          inputRef={inputRef}
+        
+        {/* Autocomplete for Suggestions */}
+        <Autocomplete
+          freeSolo
           fullWidth
-          placeholder="Search movies, TV shows..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && doSearch()}
-          variant="outlined"
-          size="medium"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-            endAdornment: query && (
-              <InputAdornment position="end">
-                <IconButton onClick={handleClear} size="small">
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          open={open && suggestions.length > 0}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
+          options={suggestions}
+          getOptionLabel={(option) => typeof option === 'string' ? option : (option?.title || '')}
+          filterOptions={(x) => x} // Disable local filtering, we rely on the API
+          inputValue={query}
+          onInputChange={(event, newInputValue) => {
+            setQuery(newInputValue);
           }}
-          sx={{ borderRadius: 2 }}
+          onChange={(event, newValue) => {
+            if (newValue && typeof newValue !== 'string') {
+              setQuery(newValue.title || '');
+              doSearch(newValue.title || '');
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              // Prevent default form submission behavior and run our search
+              e.preventDefault();
+              doSearch();
+            }
+          }}
+          renderOption={(props, option) => {
+            if (typeof option === 'string') return null; // Defensive check
+            return (
+              <li {...props} key={option?.id || Math.random()} style={{ padding: '8px 16px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                  {option?.poster_path ? (
+                    <Box
+                      component="img"
+                      src={getImageUrl(option.poster_path, 'w92')}
+                      alt={option.title}
+                      sx={{ width: 40, height: 60, objectFit: 'cover', borderRadius: 1 }}
+                    />
+                  ) : (
+                    <Box sx={{ width: 40, height: 60, bgcolor: '#333', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">No Img</Typography>
+                    </Box>
+                  )}
+                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                    <Typography variant="body1" fontWeight={600} noWrap>
+                      {option?.title || 'Unknown'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      {option?.release_date?.slice(0, 4)} • ⭐ {option?.vote_average?.toFixed(1)}
+                    </Typography>
+                  </Box>
+                </Box>
+              </li>
+            );
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              inputRef={inputRef}
+              placeholder="Search movies, TV shows..."
+              variant="outlined"
+              size="medium"
+              InputProps={{
+                ...(params.InputProps || {}),
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <React.Fragment>
+                    {loadingSuggestions ? <CircularProgress color="inherit" size={20} /> : null}
+                    {query && (
+                      <InputAdornment position="end" sx={{ position: 'absolute', right: 40 }}>
+                        <IconButton onClick={handleClear} size="small">
+                          <ClearIcon fontSize="small" />
+                        </IconButton>
+                      </InputAdornment>
+                    )}
+                    {params.InputProps?.endAdornment}
+                  </React.Fragment>
+                ),
+              }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': { borderRadius: 2, paddingRight: '60px !important' } 
+              }}
+            />
+          )}
         />
+
         <Tooltip title="Search">
           <IconButton
-            color="primary"
             onClick={() => doSearch()}
             sx={{
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': { bgcolor: 'primary.dark' },
+              bgcolor: '#E5A00D',
+              color: '#000',
+              '&:hover': { bgcolor: '#C8880A' },
               width: 48,
               height: 48,
+              borderRadius: 2,
+              flexShrink: 0
             }}
           >
             <SearchIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title="Toggle Filters">
-          <IconButton onClick={() => setShowFilters((s) => !s)} color={showFilters ? 'primary' : 'default'}>
+          <IconButton onClick={() => setShowFilters((s) => !s)} color={showFilters ? 'primary' : 'default'} sx={{ flexShrink: 0 }}>
             <TuneIcon />
           </IconButton>
         </Tooltip>
@@ -181,7 +278,18 @@ export default function SearchBar() {
             />
           )}
 
-          <Button variant="contained" size="small" onClick={() => doSearch()} startIcon={<FilterIcon />}>
+          <Button 
+            variant="contained" 
+            size="small" 
+            onClick={() => doSearch()} 
+            startIcon={<FilterIcon />}
+            sx={{
+              bgcolor: '#E5A00D',
+              color: '#000',
+              fontWeight: 700,
+              '&:hover': { bgcolor: '#C8880A' }
+            }}
+          >
             Apply
           </Button>
         </Box>

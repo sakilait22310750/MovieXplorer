@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Card, CardMedia, CardContent, CardActions,
-  Typography, IconButton, Chip, Box, Tooltip, Rating,
+  Typography, IconButton, Box, Tooltip, Rating,
 } from '@mui/material';
 import {
   Favorite, FavoriteBorder, Star as StarIcon,
@@ -40,15 +40,15 @@ export default function MovieCard({ movie }) {
         sx={{
           position: 'absolute',
           top: 8, left: 8,
-          bgcolor: 'rgba(0,0,0,0.75)',
-          color: '#f5c518',
+          bgcolor: 'rgba(0,0,0,0.8)',
+          color: '#E5A00D',
           borderRadius: 1,
           px: 0.8, py: 0.3,
           display: 'flex', alignItems: 'center', gap: 0.4,
           fontSize: 13, fontWeight: 700,
         }}
       >
-        <StarIcon sx={{ fontSize: 14, color: '#f5c518' }} />
+        <StarIcon sx={{ fontSize: 14, color: '#E5A00D' }} />
         {rating}
       </Box>
 
@@ -60,11 +60,11 @@ export default function MovieCard({ movie }) {
             onClick={(e) => { e.stopPropagation(); toggleFavorite(movie); }}
             sx={{
               bgcolor: 'rgba(0,0,0,0.6)',
-              '&:hover': { bgcolor: 'rgba(229,9,20,0.8)' },
+              '&:hover': { bgcolor: 'rgba(229,160,13,0.85)' },
             }}
           >
             {fav
-              ? <Favorite sx={{ color: '#e50914', fontSize: 20 }} />
+              ? <Favorite sx={{ color: '#E5A00D', fontSize: 20 }} />
               : <FavoriteBorder sx={{ color: 'white', fontSize: 20 }} />
             }
           </IconButton>

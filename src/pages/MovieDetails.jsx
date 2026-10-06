@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Box, Grid, Typography, Chip, Button, Avatar,
-  CircularProgress, Alert, Divider, IconButton, Rating,
-  Stack, Tooltip, Dialog, DialogContent, Paper,
+  CircularProgress, Alert, Divider, Rating,
+  Stack, Dialog, DialogContent, Paper,
 } from '@mui/material';
 import {
   Favorite, FavoriteBorder, ArrowBack,
-  PlayCircleOutline as PlayIcon,
+  PlayCircleOutlined as PlayIcon,
   Star as StarIcon, CalendarToday, AccessTime,
   Language as LanguageIcon,
 } from '@mui/icons-material';
@@ -101,7 +101,16 @@ export default function MovieDetails() {
               <Button
                 fullWidth
                 variant={fav ? 'contained' : 'outlined'}
-                color="primary"
+                sx={{
+                  bgcolor: fav ? '#E5A00D' : 'transparent',
+                  borderColor: '#E5A00D',
+                  color: fav ? '#000' : '#E5A00D',
+                  fontWeight: 700,
+                  '&:hover': {
+                    bgcolor: fav ? '#C8880A' : 'rgba(229,160,13,0.1)',
+                    borderColor: '#C8880A'
+                  }
+                }}
                 startIcon={fav ? <Favorite /> : <FavoriteBorder />}
                 onClick={() => toggleFavorite(movie)}
               >
@@ -112,10 +121,14 @@ export default function MovieDetails() {
                 <Button
                   fullWidth
                   variant="contained"
-                  color="secondary"
                   startIcon={<PlayIcon />}
                   onClick={() => setTrailerOpen(true)}
-                  sx={{ color: 'black' }}
+                  sx={{
+                    bgcolor: '#222',
+                    color: '#fff',
+                    fontWeight: 700,
+                    '&:hover': { bgcolor: '#333' }
+                  }}
                 >
                   Watch Trailer
                 </Button>
@@ -138,7 +151,7 @@ export default function MovieDetails() {
             {/* Meta info */}
             <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" mb={2}>
               <Box display="flex" alignItems="center" gap={0.5}>
-                <StarIcon sx={{ color: '#f5c518', fontSize: 20 }} />
+                <StarIcon sx={{ color: '#E5A00D', fontSize: 20 }} />
                 <Typography fontWeight={700}>{movie.vote_average?.toFixed(1)}</Typography>
                 <Typography color="text.secondary" variant="body2">
                   ({movie.vote_count?.toLocaleString()} votes)
@@ -167,7 +180,7 @@ export default function MovieDetails() {
             {/* Genres */}
             <Box mb={2} display="flex" flexWrap="wrap" gap={1}>
               {genres.map((g) => (
-                <Chip key={g.id} label={g.name} color="primary" variant="outlined" size="small" />
+                <Chip key={g.id} label={g.name} sx={{ borderColor: '#E5A00D', color: '#E5A00D' }} variant="outlined" size="small" />
               ))}
             </Box>
 

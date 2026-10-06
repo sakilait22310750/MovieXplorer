@@ -36,7 +36,7 @@ export default function TrendingSection() {
   return (
     <Box sx={{ mb: 4 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-        <FireIcon color="primary" />
+        <FireIcon sx={{ color: '#E5A00D' }} />
         <Typography variant="h6" fontWeight={700}>
           Trending This Week
         </Typography>
@@ -49,7 +49,7 @@ export default function TrendingSection() {
           sx={{
             position: 'absolute', left: -16, top: '50%', transform: 'translateY(-50%)',
             zIndex: 10, bgcolor: 'background.paper', boxShadow: 3,
-            '&:hover': { bgcolor: 'primary.main', color: 'white' },
+            '&:hover': { bgcolor: '#E5A00D', color: '#000' },
           }}
         >
           <ChevronLeft />
@@ -88,12 +88,12 @@ export default function TrendingSection() {
 
                     {/* Rating chip */}
                     <Chip
-                      icon={<StarIcon sx={{ fontSize: '12px !important', color: '#f5c518 !important' }} />}
+                      icon={<StarIcon sx={{ fontSize: '12px !important', color: '#E5A00D !important' }} />}
                       label={movie.vote_average?.toFixed(1)}
                       size="small"
                       sx={{
                         position: 'absolute', top: 6, left: 6,
-                        bgcolor: 'rgba(0,0,0,0.75)', color: 'white',
+                        bgcolor: 'rgba(0,0,0,0.8)', color: 'white',
                         fontSize: 11, height: 22,
                       }}
                     />
@@ -106,12 +106,12 @@ export default function TrendingSection() {
                         sx={{
                           position: 'absolute', top: 4, right: 4,
                           bgcolor: 'rgba(0,0,0,0.55)',
-                          '&:hover': { bgcolor: 'rgba(229,9,20,0.8)' },
+                          '&:hover': { bgcolor: 'rgba(229,160,13,0.85)' },
                           p: 0.5,
                         }}
                       >
                         {fav
-                          ? <Favorite sx={{ color: '#e50914', fontSize: 16 }} />
+                          ? <Favorite sx={{ color: '#E5A00D', fontSize: 16 }} />
                           : <FavoriteBorder sx={{ color: 'white', fontSize: 16 }} />
                         }
                       </IconButton>
@@ -136,7 +136,7 @@ export default function TrendingSection() {
           sx={{
             position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)',
             zIndex: 10, bgcolor: 'background.paper', boxShadow: 3,
-            '&:hover': { bgcolor: 'primary.main', color: 'white' },
+            '&:hover': { bgcolor: '#E5A00D', color: '#000' },
           }}
         >
           <ChevronRight />

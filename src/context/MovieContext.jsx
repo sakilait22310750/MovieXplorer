@@ -67,6 +67,53 @@ export const MovieProvider = ({ children }) => {
     [favorites]
   );
 
+  // Authentication state
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('currentUser')) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const register = (username, password) => {
+    try {
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+        return { success: false, message: 'Username already exists' };
+      }
+      const newUser = { username, password }; // Note: Passwords should be hashed in production
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      setCurrentUser({ username });
+      localStorage.setItem('currentUser', JSON.stringify({ username }));
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: 'Registration failed' };
+    }
+  };
+
+  const login = (username, password) => {
+    try {
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const user = users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+      if (user) {
+        setCurrentUser({ username: user.username });
+        localStorage.setItem('currentUser', JSON.stringify({ username: user.username }));
+        return { success: true };
+      }
+      return { success: false, message: 'Invalid username or password' };
+    } catch (err) {
+      return { success: false, message: 'Login failed' };
+    }
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('currentUser');
+  };
+
   return (
     <MovieContext.Provider
       value={{
@@ -87,6 +134,10 @@ export const MovieProvider = ({ children }) => {
         setCurrentPage,
         totalPages,
         setTotalPages,
+        currentUser,
+        register,
+        login,
+        logout,
       }}
     >
       {children}
