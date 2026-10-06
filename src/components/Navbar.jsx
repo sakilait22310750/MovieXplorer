@@ -18,6 +18,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { useMovie } from '../context/MovieContext';
+import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const { darkMode, toggleDarkMode, currentUser, login, register, logout } = useMovie();
@@ -28,36 +29,9 @@ export default function Navbar() {
 
   const [authMode, setAuthMode] = useState(null); // 'login', 'register', null
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [authForm, setAuthForm] = useState({ username: '', password: '' });
-  const [authError, setAuthError] = useState('');
-
-  const handleAuthSubmit = () => {
-    setAuthError('');
-    if (!authForm.username || !authForm.password) {
-      setAuthError('Please fill in all fields');
-      return;
-    }
-    
-    let result;
-    if (authMode === 'login') {
-      result = login(authForm.username, authForm.password);
-    } else {
-      result = register(authForm.username, authForm.password);
-    }
-
-    if (result.success) {
-      setAuthMode(null);
-      setAuthForm({ username: '', password: '' });
-    } else {
-      setAuthError(result.message);
-    }
-  };
 
   const openAuth = (mode) => {
     setAuthMode(mode);
-    setAuthError('');
-    setAuthForm({ username: '', password: '' });
   };
 
   const navLinks = [
@@ -240,63 +214,7 @@ export default function Navbar() {
       </Drawer>
 
       {/* Login/Register Dialog */}
-      <Dialog open={!!authMode} onClose={() => setAuthMode(null)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { bgcolor: '#1a1a1a', border: '1px solid #333' } }}>
-        <DialogTitle sx={{ fontWeight: 700, color: '#E5A00D', pb: 1 }}>
-          {authMode === 'login' ? '🎬 Sign in to MovieXplorer' : '🎬 Create Account'}
-        </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
-          {authError && <Typography color="error" variant="body2">{authError}</Typography>}
-          
-          <TextField
-            label="Username"
-            value={authForm.username}
-            onChange={(e) => setAuthForm({ ...authForm, username: e.target.value })}
-            fullWidth autoFocus
-            sx={{ '& .MuiOutlinedInput-root.Mui-focused fieldset': { borderColor: '#E5A00D' } }}
-          />
-          <TextField
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            value={authForm.password}
-            onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
-            fullWidth
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword((s) => !s)} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && handleAuthSubmit()}
-            sx={{ '& .MuiOutlinedInput-root.Mui-focused fieldset': { borderColor: '#E5A00D' } }}
-          />
-
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: -1 }}>
-            {authMode === 'login' ? (
-              <Typography variant="body2" color="text.secondary">
-                Don't have an account? <span style={{ color: '#E5A00D', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => openAuth('register')}>Sign up</span>
-              </Typography>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                Already have an account? <span style={{ color: '#E5A00D', cursor: 'pointer', fontWeight: 'bold' }} onClick={() => openAuth('login')}>Sign in</span>
-              </Typography>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setAuthMode(null)} sx={{ color: '#aaa' }}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleAuthSubmit}
-            sx={{ bgcolor: '#E5A00D', color: '#000', '&:hover': { bgcolor: '#C8880A' } }}
-          >
-            {authMode === 'login' ? 'Sign In' : 'Sign Up'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AuthModal authMode={authMode} setAuthMode={setAuthMode} />
     </>
   );
 }
