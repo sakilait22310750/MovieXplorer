@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Switch,
-  Button, Tooltip, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, InputAdornment, useMediaQuery,
+  Button, Tooltip, useMediaQuery,
   Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider,
 } from '@mui/material';
 import {
@@ -12,7 +11,6 @@ import {
   Login as LoginIcon,
   Menu as MenuIcon,
   Person as PersonIcon,
-  Visibility, VisibilityOff,
   Search as SearchIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -21,7 +19,7 @@ import { useMovie } from '../context/MovieContext';
 import AuthModal from './AuthModal';
 
 export default function Navbar() {
-  const { darkMode, toggleDarkMode, currentUser, login, register, logout } = useMovie();
+  const { darkMode, toggleDarkMode, currentUser, logout } = useMovie();
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();

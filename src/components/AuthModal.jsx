@@ -249,3 +249,4 @@ export default function AuthModal({ authMode, setAuthMode }) {
     </Dialog>
   );
 }
+
