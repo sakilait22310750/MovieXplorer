@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Container, Box, Typography, Button, Avatar,
   CircularProgress, Alert,
-  Dialog, DialogContent, IconButton,
+  Dialog, DialogContent, DialogTitle, IconButton, Rating,
 } from '@mui/material';
 import {
   Favorite, FavoriteBorder, ArrowBack,
@@ -12,22 +12,47 @@ import {
   ArrowForwardIos, ArrowBackIosNew,
   ChevronRight as ChevronRightIcon,
   Person as PersonIcon,
+  ThumbUpOutlined as ThumbUpIcon,
+  ModeCommentOutlined as CommentIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import { getMovieDetails, getImageUrl } from '../api/tmdb';
 import { useMovie } from '../context/MovieContext';
+
+const getAvatarColor = (name = '') => {
+  const colors = ['#f4511e', '#8e24aa', '#039be5', '#43a047', '#e53935', '#fb8c00', '#5e35b1', '#00acc1'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+};
 
 export default function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useMovie();
+  
   const scrollRef = useRef(null);
+  const reviewScrollRef = useRef(null);
 
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [trailerOpen, setTrailerOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
+
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const [canReviewScrollLeft, setCanReviewScrollLeft] = useState(false);
+  const [canReviewScrollRight, setCanReviewScrollRight] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -46,9 +71,20 @@ export default function MovieDetails() {
     }
   };
 
+  const checkReviewScroll = () => {
+    if (reviewScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = reviewScrollRef.current;
+      setCanReviewScrollLeft(scrollLeft > 10);
+      setCanReviewScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
   useEffect(() => {
     if (movie) {
-      const timer = setTimeout(checkScroll, 300);
+      const timer = setTimeout(() => {
+        checkScroll();
+        checkReviewScroll();
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [movie]);
@@ -58,6 +94,14 @@ export default function MovieDetails() {
       const scrollAmount = direction === 'left' ? -420 : 420;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       setTimeout(checkScroll, 350);
+    }
+  };
+
+  const scrollReviews = (direction) => {
+    if (reviewScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -460 : 460;
+      reviewScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(checkReviewScroll, 350);
     }
   };
 
@@ -87,6 +131,7 @@ export default function MovieDetails() {
     (v) => v.type === 'Trailer' && v.site === 'YouTube'
   );
   const cast = movie.credits?.cast?.slice(0, 25) || [];
+  const reviews = movie.reviews?.results || [];
   const genres = movie.genres || [];
   const runtime = movie.runtime
     ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
@@ -149,7 +194,7 @@ export default function MovieDetails() {
           position: 'relative', 
           zIndex: 2, 
           pt: { xs: 4, md: 6 }, 
-          pb: 8,
+          pb: 10,
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
@@ -390,7 +435,7 @@ export default function MovieDetails() {
 
         {/* Cast Section */}
         {cast.length > 0 && (
-          <Box sx={{ mt: 2, width: '100%', position: 'relative' }}>
+          <Box sx={{ mt: 2, mb: 5, width: '100%', position: 'relative' }}>
             {/* Header with clickable chevron */}
             <Box 
               sx={{ 
@@ -564,6 +609,225 @@ export default function MovieDetails() {
             </Box>
           </Box>
         )}
+
+        {/* Ratings & Reviews Section (matching reference image) */}
+        {reviews.length > 0 && (
+          <Box sx={{ mt: 3, width: '100%', position: 'relative' }}>
+            {/* Header with chevron */}
+            <Box 
+              sx={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 0.5, 
+                mb: 2.5, 
+                cursor: 'pointer',
+                userSelect: 'none',
+                transition: 'opacity 0.2s',
+                '&:hover': { opacity: 0.8 }
+              }}
+              onClick={() => scrollReviews('right')}
+            >
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#ffffff', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>
+                {movie.title} Ratings & Reviews
+              </Typography>
+              <ChevronRightIcon sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 26 }} />
+            </Box>
+
+            <Box sx={{ position: 'relative', width: '100%' }}>
+              {/* Left Scroll Arrow */}
+              {canReviewScrollLeft && (
+                <IconButton
+                  onClick={() => scrollReviews('left')}
+                  aria-label="Previous reviews"
+                  sx={{
+                    position: 'absolute',
+                    left: { xs: 0, sm: -16 },
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 10,
+                    bgcolor: 'rgba(16, 16, 20, 0.92)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 4px 18px rgba(0,0,0,0.8)',
+                    width: 44,
+                    height: 44,
+                    backdropFilter: 'blur(8px)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      bgcolor: '#E5A00D',
+                      color: '#000000',
+                      borderColor: '#E5A00D',
+                      transform: 'translateY(-50%) scale(1.08)',
+                    }
+                  }}
+                >
+                  <ArrowBackIosNew sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+
+              {/* Horizontal Scroll Cards Row */}
+              <Box 
+                ref={reviewScrollRef}
+                onScroll={checkReviewScroll}
+                sx={{ 
+                  display: 'flex !important', 
+                  flexDirection: 'row !important', 
+                  flexWrap: 'nowrap !important',
+                  alignItems: 'stretch',
+                  gap: 2.5, 
+                  overflowX: 'auto', 
+                  overflowY: 'hidden',
+                  width: '100%',
+                  py: 1,
+                  px: 0.5,
+                  scrollBehavior: 'smooth',
+                  msOverflowStyle: 'none',
+                  scrollbarWidth: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' } 
+                }}
+              >
+                {reviews.map((rev) => {
+                  const authorName = rev.author_details?.name || rev.author || 'Anonymous';
+                  const initial = authorName.charAt(0).toUpperCase();
+                  const ratingVal = rev.author_details?.rating ? rev.author_details.rating / 2 : 4;
+                  const avatarPath = rev.author_details?.avatar_path;
+                  const avatarSrc = avatarPath ? (avatarPath.startsWith('/http') ? avatarPath.slice(1) : getImageUrl(avatarPath, 'w185')) : null;
+
+                  return (
+                    <Box 
+                      key={rev.id}
+                      onClick={() => setSelectedReview(rev)}
+                      sx={{ 
+                        flex: '0 0 auto !important', 
+                        width: { xs: 280, sm: 340 }, 
+                        bgcolor: 'rgba(20, 22, 28, 0.85)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '14px',
+                        p: 2.5,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        backdropFilter: 'blur(8px)',
+                        transition: 'all 0.25s ease',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          bgcolor: 'rgba(26, 29, 38, 0.95)',
+                          borderColor: 'rgba(255, 255, 255, 0.18)',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+                        }
+                      }}
+                    >
+                      {/* Top: Avatar, Name & Date */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                        <Avatar
+                          src={avatarSrc || undefined}
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            bgcolor: getAvatarColor(authorName),
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            color: '#fff',
+                          }}
+                        >
+                          {initial}
+                        </Avatar>
+                        <Box sx={{ overflow: 'hidden' }}>
+                          <Typography 
+                            variant="subtitle2" 
+                            fontWeight={700} 
+                            sx={{ color: '#fff', lineHeight: 1.2, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                          >
+                            {authorName}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem' }}>
+                            {formatDate(rev.created_at)}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Middle: Star Rating & Review snippet */}
+                      <Box sx={{ mb: 2 }}>
+                        <Rating 
+                          value={ratingVal} 
+                          precision={0.5} 
+                          readOnly 
+                          size="small" 
+                          sx={{ 
+                            mb: 1, 
+                            '& .MuiRating-iconFilled': { color: '#ffffff' },
+                            '& .MuiRating-iconEmpty': { color: 'rgba(255,255,255,0.2)' }
+                          }} 
+                        />
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: 'rgba(255,255,255,0.85)', 
+                            fontSize: '0.9rem',
+                            lineHeight: 1.55,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          "{rev.content}"
+                        </Typography>
+                      </Box>
+
+                      {/* Bottom Footer: Reactions */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.8 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, color: 'rgba(255,255,255,0.5)' }}>
+                            <ThumbUpIcon sx={{ fontSize: 16 }} />
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, color: 'rgba(255,255,255,0.5)' }}>
+                            <CommentIcon sx={{ fontSize: 16 }} />
+                          </Box>
+                        </Box>
+                        <Typography variant="caption" sx={{ color: '#E5A00D', fontWeight: 600, fontSize: '0.75rem' }}>
+                          Read more
+                        </Typography>
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+
+              {/* Right Scroll Arrow */}
+              {canReviewScrollRight && (
+                <IconButton
+                  onClick={() => scrollReviews('right')}
+                  aria-label="Next reviews"
+                  sx={{
+                    position: 'absolute',
+                    right: { xs: 0, sm: -16 },
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 10,
+                    bgcolor: 'rgba(16, 16, 20, 0.92)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 4px 18px rgba(0,0,0,0.8)',
+                    width: 44,
+                    height: 44,
+                    backdropFilter: 'blur(8px)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      bgcolor: '#E5A00D',
+                      color: '#000000',
+                      borderColor: '#E5A00D',
+                      transform: 'translateY(-50%) scale(1.08)',
+                    }
+                  }}
+                >
+                  <ArrowForwardIos sx={{ fontSize: 16 }} />
+                </IconButton>
+              )}
+            </Box>
+          </Box>
+        )}
       </Container>
 
       {/* Cinematic Trailer Dialog */}
@@ -595,6 +859,76 @@ export default function MovieDetails() {
             />
           )}
         </DialogContent>
+      </Dialog>
+
+      {/* Full Review Dialog Modal */}
+      <Dialog
+        open={Boolean(selectedReview)}
+        onClose={() => setSelectedReview(null)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: '#14161c',
+            color: '#fff',
+            borderRadius: '16px',
+            p: 1.5,
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 12px 40px rgba(0,0,0,0.9)',
+          }
+        }}
+      >
+        {selectedReview && (
+          <>
+            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: getAvatarColor(selectedReview.author),
+                    fontWeight: 700,
+                  }}
+                >
+                  {selectedReview.author?.charAt(0).toUpperCase()}
+                </Avatar>
+                <Box>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff' }}>
+                    {selectedReview.author}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                    {formatDate(selectedReview.created_at)}
+                  </Typography>
+                </Box>
+              </Box>
+              <IconButton onClick={() => setSelectedReview(null)} sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ pt: 1 }}>
+              <Rating 
+                value={selectedReview.author_details?.rating ? selectedReview.author_details.rating / 2 : 4} 
+                precision={0.5} 
+                readOnly 
+                size="small" 
+                sx={{ 
+                  mb: 2, 
+                  '& .MuiRating-iconFilled': { color: '#E5A00D' },
+                  '& .MuiRating-iconEmpty': { color: 'rgba(255,255,255,0.2)' }
+                }} 
+              />
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: 'rgba(255,255,255,0.88)', 
+                  lineHeight: 1.7, 
+                  fontSize: '0.98rem',
+                  whiteSpace: 'pre-line' 
+                }}
+              >
+                {selectedReview.content}
+              </Typography>
+            </DialogContent>
+          </>
+        )}
       </Dialog>
     </Box>
   );

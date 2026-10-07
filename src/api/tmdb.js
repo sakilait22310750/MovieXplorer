@@ -15,9 +15,9 @@ export const getTrending = () => api.get('/trending/movie/week');
 export const searchMovies = (query, page = 1) =>
   api.get('/search/movie', { params: { query, page, include_adult: false } });
 
-// Get full movie details with videos and credits
+// Get full movie details with videos, credits, and reviews
 export const getMovieDetails = (id) =>
-  api.get(`/movie/${id}`, { params: { append_to_response: 'videos,credits' } });
+  api.get(`/movie/${id}`, { params: { append_to_response: 'videos,credits,reviews' } });
 
 // Discover movies by genre
 export const getMoviesByGenre = (genreId, page = 1) =>
