@@ -23,6 +23,10 @@ export const getMovieDetails = (id) =>
 export const getMoviesByGenre = (genreId, page = 1) =>
   api.get('/discover/movie', { params: { with_genres: genreId, page, sort_by: 'popularity.desc' } });
 
+// Discover movies with flexible filters
+export const discoverMovies = (filters, page = 1) =>
+  api.get('/discover/movie', { params: { ...filters, page, sort_by: 'popularity.desc', include_adult: false } });
+
 // Get all genres list
 export const getGenres = () => api.get('/genre/movie/list');
 

@@ -10,7 +10,7 @@ import {
   FilterList as FilterIcon,
   TuneOutlined as TuneIcon,
 } from '@mui/icons-material';
-import { searchMovies, getGenres, getImageUrl } from '../api/tmdb';
+import { searchMovies, getGenres, getImageUrl, discoverMovies } from '../api/tmdb';
 import { useMovie } from '../context/MovieContext';
 
 export default function SearchBar() {
@@ -64,37 +64,47 @@ export default function SearchBar() {
 
   const doSearch = async (q = query, page = 1) => {
     const trimmed = q.trim();
-    if (!trimmed) return;
+    if (!trimmed && !selectedGenre && !selectedYear && !selectedRating) return;
 
     setSearchLoading(true);
     setSearchError('');
-    setLastSearch(trimmed);
+    setLastSearch(trimmed || 'Filtered Results');
     setOpen(false); // Close suggestions on actual search
 
     try {
-      const res = await searchMovies(trimmed, page);
-      let results = res.data.results || [];
+      let results = [];
+      let totalPgs = 1;
 
-      // Client-side filtering
-      if (selectedGenre) {
-        results = results.filter((m) =>
-          m.genre_ids?.includes(Number(selectedGenre))
-        );
-      }
-      if (selectedYear) {
-        results = results.filter((m) =>
-          m.release_date?.startsWith(selectedYear)
-        );
-      }
-      if (selectedRating) {
-        results = results.filter((m) =>
-          m.vote_average >= Number(selectedRating)
-        );
+      if (trimmed) {
+        // Text search (API limits filtering, so we do it client-side)
+        const res = await searchMovies(trimmed, page);
+        results = res.data.results || [];
+        totalPgs = res.data.total_pages || 1;
+
+        if (selectedGenre) {
+          results = results.filter((m) => m.genre_ids?.includes(Number(selectedGenre)));
+        }
+        if (selectedYear) {
+          results = results.filter((m) => m.release_date?.startsWith(selectedYear));
+        }
+        if (selectedRating) {
+          results = results.filter((m) => m.vote_average >= Number(selectedRating));
+        }
+      } else {
+        // Discover without text
+        const filters = {};
+        if (selectedGenre) filters.with_genres = selectedGenre;
+        if (selectedYear) filters.primary_release_year = selectedYear;
+        if (selectedRating) filters['vote_average.gte'] = selectedRating;
+        
+        const res = await discoverMovies(filters, page);
+        results = res.data.results || [];
+        totalPgs = res.data.total_pages || 1;
       }
 
       setSearchResults(results);
-      setCurrentPage(res.data.page || 1);
-      setTotalPages(res.data.total_pages || 1);
+      setCurrentPage(page);
+      setTotalPages(totalPgs);
     } catch (err) {
       setSearchError('Failed to fetch search results. Please try again.');
     } finally {
