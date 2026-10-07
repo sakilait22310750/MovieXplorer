@@ -64,7 +64,11 @@ export default function SearchBar() {
 
   const doSearch = async (q = query, page = 1) => {
     const trimmed = q.trim();
-    if (!trimmed && !selectedGenre && !selectedYear && !selectedRating) return;
+    if (!trimmed && !selectedGenre && !selectedYear && !selectedRating) {
+      setSearchResults([]);
+      setLastSearch('');
+      return;
+    }
 
     setSearchLoading(true);
     setSearchError('');
@@ -281,7 +285,7 @@ export default function SearchBar() {
           {(selectedGenre || selectedYear || selectedRating) && (
             <Chip
               label="Clear Filters"
-              onDelete={() => { setSelectedGenre(''); setSelectedYear(''); setSelectedRating(''); }}
+              onDelete={() => { setSelectedGenre(''); setSelectedYear(''); setSelectedRating(''); setSearchResults([]); setLastSearch(''); }}
               color="primary"
               variant="outlined"
               size="small"
