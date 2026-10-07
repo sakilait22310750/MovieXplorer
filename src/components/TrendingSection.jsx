@@ -165,11 +165,11 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
 }
 
 const GENRE_CONFIG = [
-  { id: 28, title: 'Trending Action', icon: <ActionIcon sx={{ color: '#E5A00D' }} /> },
-  { id: 35, title: 'Trending Comedy', icon: <ComedyIcon sx={{ color: '#E5A00D' }} /> },
-  { id: 27, title: 'Trending Horror', icon: <HorrorIcon sx={{ color: '#E5A00D' }} /> },
-  { id: 878, title: 'Trending Sci-Fi', icon: <SciFiIcon sx={{ color: '#E5A00D' }} /> },
-  { id: 16, title: 'Trending Animation', icon: <AnimationIcon sx={{ color: '#E5A00D' }} /> },
+  { id: 28, title: 'Action', icon: <ActionIcon sx={{ color: '#E5A00D' }} /> },
+  { id: 35, title: 'Comedy', icon: <ComedyIcon sx={{ color: '#E5A00D' }} /> },
+  { id: 27, title: 'Horror', icon: <HorrorIcon sx={{ color: '#E5A00D' }} /> },
+  { id: 878, title: 'Sci-Fi', icon: <SciFiIcon sx={{ color: '#E5A00D' }} /> },
+  { id: 16, title: 'Animation', icon: <AnimationIcon sx={{ color: '#E5A00D' }} /> },
 ];
 
 export default function TrendingSection() {
