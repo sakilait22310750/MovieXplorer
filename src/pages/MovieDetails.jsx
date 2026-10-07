@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Container, Box, Typography, Chip, Button, Avatar,
+  Container, Box, Typography, Button, Avatar,
   CircularProgress, Alert,
-  Stack, Dialog, DialogContent, IconButton,
+  Dialog, DialogContent, IconButton,
 } from '@mui/material';
 import {
   Favorite, FavoriteBorder, ArrowBack,
@@ -55,7 +55,7 @@ export default function MovieDetails() {
 
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -400 : 400;
+      const scrollAmount = direction === 'left' ? -420 : 420;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       setTimeout(checkScroll, 350);
     }
@@ -64,7 +64,7 @@ export default function MovieDetails() {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="70vh">
-        <CircularProgress size={60} color="primary" />
+        <CircularProgress size={60} sx={{ color: '#E5A00D' }} />
       </Box>
     );
   }
@@ -73,7 +73,7 @@ export default function MovieDetails() {
     return (
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Alert severity="error">{error}</Alert>
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mt: 2 }}>
+        <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mt: 2, color: '#E5A00D' }}>
           Go Back
         </Button>
       </Container>
@@ -93,8 +93,8 @@ export default function MovieDetails() {
     : 'N/A';
 
   return (
-    <Box sx={{ position: 'relative', minHeight: '100vh', width: '100%', overflowX: 'hidden', backgroundColor: '#0f0f0f' }}>
-      {/* Background Image Layer */}
+    <Box sx={{ position: 'relative', minHeight: '100vh', width: '100%', overflowX: 'hidden', backgroundColor: '#0a0a0c' }}>
+      {/* Background Hero Backdrop Layer */}
       {movie.backdrop_path && (
         <Box
           sx={{
@@ -114,7 +114,7 @@ export default function MovieDetails() {
         />
       )}
 
-      {/* Gradient Overlay Layer */}
+      {/* Atmospheric Cinematic Gradient Overlay */}
       <Box
         sx={{
           position: 'absolute',
@@ -123,10 +123,22 @@ export default function MovieDetails() {
           right: 0,
           bottom: 0,
           background: {
-            xs: 'linear-gradient(to top, #0f0f0f 0%, rgba(15,15,15,0.95) 55%, rgba(15,15,15,0.4) 100%)',
-            md: 'linear-gradient(to right, #0f0f0f 0%, #0f0f0f 35%, rgba(15,15,15,0.8) 60%, transparent 100%)'
+            xs: 'linear-gradient(to top, #0a0a0c 0%, rgba(10,10,12,0.95) 50%, rgba(10,10,12,0.5) 100%)',
+            md: 'linear-gradient(to right, #0a0a0c 0%, #0a0a0c 38%, rgba(10,10,12,0.85) 65%, transparent 100%)'
           },
           zIndex: 1,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(to bottom, rgba(10,10,12,0.4) 0%, transparent 30%, rgba(10,10,12,0.8) 85%, #0a0a0c 100%)',
+          zIndex: 1,
+          pointerEvents: 'none',
         }}
       />
 
@@ -136,7 +148,7 @@ export default function MovieDetails() {
         sx={{ 
           position: 'relative', 
           zIndex: 2, 
-          pt: { xs: 8, md: 12 }, 
+          pt: { xs: 4, md: 6 }, 
           pb: 8,
           display: 'flex',
           flexDirection: 'column',
@@ -144,66 +156,174 @@ export default function MovieDetails() {
           minHeight: '100vh',
         }}
       >
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ alignSelf: 'flex-start', mb: { xs: 2, md: 3 }, color: '#fff' }}>
+        {/* Back Button */}
+        <Button 
+          startIcon={<ArrowBack sx={{ fontSize: 18 }} />} 
+          onClick={() => navigate(-1)} 
+          sx={{ 
+            alignSelf: 'flex-start', 
+            mb: { xs: 3, md: 5 }, 
+            color: 'rgba(255,255,255,0.85)',
+            bgcolor: 'rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(8px)',
+            borderRadius: '20px',
+            px: 2.2,
+            py: 0.6,
+            textTransform: 'none',
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            border: '1px solid rgba(255,255,255,0.1)',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              bgcolor: 'rgba(255,255,255,0.15)',
+              color: '#fff',
+              transform: 'translateX(-3px)',
+            }
+          }}
+        >
           Back
         </Button>
 
-        <Box sx={{ maxWidth: { xs: '100%', md: '55%' } }}>
-          <Typography variant="h2" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '2.3rem', md: '3.8rem' }, textShadow: '2px 2px 4px rgba(0,0,0,0.8)', color: '#fff' }}>
+        {/* Hero Movie Details Column */}
+        <Box sx={{ maxWidth: { xs: '100%', md: '650px' } }}>
+          {/* Title */}
+          <Typography 
+            variant="h1" 
+            sx={{ 
+              fontSize: { xs: '2.4rem', sm: '3.4rem', md: '4rem' }, 
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.12,
+              color: '#ffffff',
+              textShadow: '0 4px 24px rgba(0,0,0,0.9)',
+              mb: 1.5,
+            }}
+          >
             {movie.title}
           </Typography>
 
+          {/* Tagline */}
           {movie.tagline && (
-            <Typography variant="h6" color="text.secondary" fontStyle="italic" gutterBottom sx={{ mb: 2 }}>
+            <Typography 
+              variant="subtitle1" 
+              sx={{ 
+                color: 'rgba(255, 255, 255, 0.72)',
+                fontSize: { xs: '1.05rem', md: '1.2rem' },
+                fontStyle: 'italic',
+                fontWeight: 400,
+                letterSpacing: '0.01em',
+                lineHeight: 1.4,
+                mb: 2.8,
+              }}
+            >
               "{movie.tagline}"
             </Typography>
           )}
 
-          {/* Meta Info */}
-          <Stack direction="row" spacing={3} alignItems="center" flexWrap="wrap" mb={3} sx={{ color: '#ccc' }}>
+          {/* Unified, Clean Metadata Row */}
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              flexWrap: 'wrap', 
+              gap: { xs: 1.2, sm: 1.8 }, 
+              mb: 3.5 
+            }}
+          >
+            {/* Year */}
             {movie.release_date && (
-              <Typography variant="subtitle1" fontWeight={600}>
+              <Typography sx={{ color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600, fontSize: '0.95rem' }}>
                 {movie.release_date.slice(0, 4)}
               </Typography>
             )}
-            
-            <Typography variant="subtitle1" fontWeight={600}>
+
+            {/* Dot separator */}
+            <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
+
+            {/* Runtime */}
+            <Typography sx={{ color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600, fontSize: '0.95rem' }}>
               {runtime}
             </Typography>
 
-            <Box display="flex" alignItems="center" gap={0.5}>
-               <StarIcon sx={{ color: '#E5A00D', fontSize: 20 }} />
-               <Typography variant="subtitle1" fontWeight={600} sx={{ color: '#fff' }}>
-                 {movie.vote_average?.toFixed(1)}
-               </Typography>
+            {/* Dot separator */}
+            <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
+
+            {/* Sleek Rating Badge */}
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.6,
+                bgcolor: 'rgba(229, 160, 13, 0.15)',
+                border: '1px solid rgba(229, 160, 13, 0.4)',
+                borderRadius: '6px',
+                px: 1.2,
+                py: 0.35,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <StarIcon sx={{ color: '#E5A00D', fontSize: 16 }} />
+              <Typography sx={{ color: '#E5A00D', fontWeight: 700, fontSize: '0.9rem', lineHeight: 1 }}>
+                {movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}
+              </Typography>
             </Box>
-          </Stack>
-          
-          {/* Genres */}
-          <Box mb={3} display="flex" flexWrap="wrap" gap={1}>
-             {genres.map((g) => (
-                <Chip key={g.id} label={g.name} size="small" sx={{ color: '#fff', bgcolor: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', fontWeight: 600 }} />
-             ))}
+
+            {/* Genres as elegant pill tags */}
+            {genres.length > 0 && (
+              <>
+                <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
+                <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap' }}>
+                  {genres.map((g) => (
+                    <Box
+                      key={g.id}
+                      sx={{
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        bgcolor: 'rgba(255, 255, 255, 0.08)',
+                        border: '1px solid rgba(255, 255, 255, 0.14)',
+                        borderRadius: '16px',
+                        px: 1.4,
+                        py: 0.35,
+                        fontSize: '0.8rem',
+                        fontWeight: 500,
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      {g.name}
+                    </Box>
+                  ))}
+                </Box>
+              </>
+            )}
           </Box>
 
-          {/* Buttons */}
-          <Stack direction="row" spacing={2} alignItems="center" mb={4}>
+          {/* Action Buttons Row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
             {trailer ? (
               <Button
                 variant="contained"
                 size="large"
-                startIcon={<PlayIcon />}
+                startIcon={<PlayIcon sx={{ fontSize: 22 }} />}
                 onClick={() => setTrailerOpen(true)}
                 sx={{
                   bgcolor: '#E5A00D',
-                  color: '#000',
+                  color: '#000000',
                   fontWeight: 800,
-                  px: 4,
-                  py: 1.5,
+                  fontSize: '1rem',
+                  px: 3.8,
+                  py: 1.3,
                   borderRadius: '30px',
                   textTransform: 'none',
-                  fontSize: '1.1rem',
-                  '&:hover': { bgcolor: '#C8880A' }
+                  letterSpacing: '0.02em',
+                  boxShadow: '0 6px 20px rgba(229, 160, 13, 0.35)',
+                  transition: 'all 0.25s ease',
+                  '&:hover': {
+                    bgcolor: '#f5ad18',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 26px rgba(229, 160, 13, 0.5)',
+                  },
+                  '&:active': {
+                    transform: 'translateY(0)',
+                  }
                 }}
               >
                 Watch Trailer
@@ -215,62 +335,80 @@ export default function MovieDetails() {
                 disabled
                 sx={{
                   bgcolor: 'rgba(255,255,255,0.1)',
-                  color: 'rgba(255,255,255,0.5)',
-                  fontWeight: 800,
-                  px: 4,
-                  py: 1.5,
+                  color: 'rgba(255,255,255,0.4)',
+                  fontWeight: 700,
+                  px: 3.5,
+                  py: 1.3,
                   borderRadius: '30px',
                   textTransform: 'none',
-                  fontSize: '1.1rem'
                 }}
               >
                 Trailer Unavailable
               </Button>
             )}
 
-            {/* Action Icons */}
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                sx={{
-                  minWidth: 'auto', width: 52, height: 52, borderRadius: '50%',
-                  borderColor: fav ? '#E5A00D' : 'rgba(255,255,255,0.3)',
-                  color: fav ? '#E5A00D' : '#fff',
-                  '&:hover': { borderColor: '#E5A00D', color: '#E5A00D', bgcolor: 'rgba(229,160,13,0.1)' }
-                }}
-                onClick={() => toggleFavorite(movie)}
-                title={fav ? 'Remove from Favorites' : 'Add to Favorites'}
-              >
-                {fav ? <Favorite /> : <FavoriteBorder />}
-              </Button>
-            </Box>
-          </Stack>
+            {/* Favorite Action Button */}
+            <IconButton
+              onClick={() => toggleFavorite(movie)}
+              title={fav ? 'Remove from Favorites' : 'Add to Favorites'}
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                bgcolor: fav ? 'rgba(229, 160, 13, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                border: `1.5px solid ${fav ? '#E5A00D' : 'rgba(255, 255, 255, 0.22)'}`,
+                color: fav ? '#E5A00D' : '#ffffff',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: fav ? 'rgba(229, 160, 13, 0.3)' : 'rgba(255, 255, 255, 0.16)',
+                  borderColor: fav ? '#f5ad18' : 'rgba(255, 255, 255, 0.5)',
+                  transform: 'scale(1.08)',
+                },
+              }}
+            >
+              {fav ? <Favorite sx={{ fontSize: 24 }} /> : <FavoriteBorder sx={{ fontSize: 24 }} />}
+            </IconButton>
+          </Box>
 
-          {/* Overview */}
-          <Typography variant="body1" sx={{ fontSize: '1.05rem', lineHeight: 1.7, color: '#ddd', mb: 4, maxWidth: 700 }}>
+          {/* Overview Synopsis */}
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              color: 'rgba(255, 255, 255, 0.82)',
+              fontSize: { xs: '1rem', md: '1.08rem' },
+              lineHeight: 1.75,
+              fontWeight: 400,
+              letterSpacing: '0.01em',
+              textShadow: '0 2px 10px rgba(0,0,0,0.6)',
+              mb: 5,
+            }}
+          >
             {movie.overview || 'No overview available.'}
           </Typography>
         </Box>
 
         {/* Cast Section */}
         {cast.length > 0 && (
-          <Box sx={{ mt: 3, width: '100%', position: 'relative' }}>
+          <Box sx={{ mt: 2, width: '100%', position: 'relative' }}>
+            {/* Header with clickable chevron */}
             <Box 
               sx={{ 
                 display: 'inline-flex', 
                 alignItems: 'center', 
                 gap: 0.5, 
-                mb: 2, 
+                mb: 2.5, 
                 cursor: 'pointer',
                 userSelect: 'none',
-                '&:hover': { opacity: 0.85 }
+                transition: 'opacity 0.2s',
+                '&:hover': { opacity: 0.8 }
               }}
               onClick={() => scroll('right')}
             >
-              <Typography variant="h6" fontWeight={700} sx={{ color: '#fff', fontSize: '1.25rem' }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#ffffff', fontSize: '1.3rem', letterSpacing: '-0.01em' }}>
                 Cast of {movie.title}
               </Typography>
-              <ChevronRightIcon sx={{ color: '#fff', fontSize: 26 }} />
+              <ChevronRightIcon sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 26 }} />
             </Box>
 
             <Box sx={{ position: 'relative', width: '100%' }}>
@@ -282,27 +420,30 @@ export default function MovieDetails() {
                   sx={{
                     position: 'absolute',
                     left: { xs: 0, sm: -16 },
-                    top: '40%',
+                    top: '42%',
                     transform: 'translateY(-50%)',
                     zIndex: 10,
-                    bgcolor: 'rgba(20, 20, 20, 0.9)',
-                    color: '#fff',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.8)',
+                    bgcolor: 'rgba(16, 16, 20, 0.92)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 4px 18px rgba(0,0,0,0.8)',
                     width: 44,
                     height: 44,
+                    backdropFilter: 'blur(8px)',
+                    transition: 'all 0.2s ease',
                     '&:hover': {
                       bgcolor: '#E5A00D',
-                      color: '#000',
-                      borderColor: '#E5A00D'
+                      color: '#000000',
+                      borderColor: '#E5A00D',
+                      transform: 'translateY(-50%) scale(1.08)',
                     }
                   }}
                 >
-                  <ArrowBackIosNew sx={{ fontSize: 18 }} />
+                  <ArrowBackIosNew sx={{ fontSize: 16 }} />
                 </IconButton>
               )}
 
-              {/* Horizontal Cast Row */}
+              {/* Single Horizontal Cast Line */}
               <Box 
                 ref={scrollRef}
                 onScroll={checkScroll}
@@ -328,33 +469,38 @@ export default function MovieDetails() {
                     key={person.id} 
                     sx={{ 
                       flex: '0 0 auto !important', 
-                      width: { xs: 90, sm: 110 }, 
+                      width: { xs: 95, sm: 115 }, 
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      textAlign: 'center'
+                      textAlign: 'center',
+                      transition: 'transform 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                      }
                     }}
                   >
                     <Avatar
                       src={getImageUrl(person.profile_path, 'w185') || undefined}
                       alt={person.name}
                       sx={{ 
-                        width: { xs: 80, sm: 100 }, 
-                        height: { xs: 80, sm: 100 }, 
+                        width: { xs: 84, sm: 100 }, 
+                        height: { xs: 84, sm: 100 }, 
                         mb: 1.5,
-                        bgcolor: '#2b2327',
+                        bgcolor: '#201b22',
                         color: 'rgba(255,255,255,0.4)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                        border: '2px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 6px 16px rgba(0,0,0,0.6)'
                       }}
                     >
-                      <PersonIcon sx={{ fontSize: { xs: 45, sm: 60 } }} />
+                      <PersonIcon sx={{ fontSize: { xs: 45, sm: 58 } }} />
                     </Avatar>
                     <Typography 
                       variant="body2" 
                       fontWeight={700} 
                       sx={{ 
-                        color: '#fff', 
-                        fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                        color: '#ffffff', 
+                        fontSize: { xs: '0.82rem', sm: '0.88rem' },
                         lineHeight: 1.25,
                         mb: 0.5,
                         width: '100%',
@@ -369,8 +515,8 @@ export default function MovieDetails() {
                     <Typography 
                       variant="caption" 
                       sx={{ 
-                        color: 'rgba(255,255,255,0.6)', 
-                        fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                        color: 'rgba(255,255,255,0.55)', 
+                        fontSize: { xs: '0.72rem', sm: '0.78rem' },
                         lineHeight: 1.2,
                         width: '100%',
                         display: '-webkit-box',
@@ -393,23 +539,26 @@ export default function MovieDetails() {
                   sx={{
                     position: 'absolute',
                     right: { xs: 0, sm: -16 },
-                    top: '40%',
+                    top: '42%',
                     transform: 'translateY(-50%)',
                     zIndex: 10,
-                    bgcolor: 'rgba(20, 20, 20, 0.9)',
-                    color: '#fff',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.8)',
+                    bgcolor: 'rgba(16, 16, 20, 0.92)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 4px 18px rgba(0,0,0,0.8)',
                     width: 44,
                     height: 44,
+                    backdropFilter: 'blur(8px)',
+                    transition: 'all 0.2s ease',
                     '&:hover': {
                       bgcolor: '#E5A00D',
-                      color: '#000',
-                      borderColor: '#E5A00D'
+                      color: '#000000',
+                      borderColor: '#E5A00D',
+                      transform: 'translateY(-50%) scale(1.08)',
                     }
                   }}
                 >
-                  <ArrowForwardIos sx={{ fontSize: 18 }} />
+                  <ArrowForwardIos sx={{ fontSize: 16 }} />
                 </IconButton>
               )}
             </Box>
@@ -417,8 +566,21 @@ export default function MovieDetails() {
         )}
       </Container>
 
-      {/* Trailer Dialog */}
-      <Dialog open={trailerOpen} onClose={() => setTrailerOpen(false)} maxWidth="md" fullWidth>
+      {/* Cinematic Trailer Dialog */}
+      <Dialog 
+        open={trailerOpen} 
+        onClose={() => setTrailerOpen(false)} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: '#000',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.9)',
+          }
+        }}
+      >
         <DialogContent sx={{ p: 0, aspectRatio: '16/9', bgcolor: 'black', overflow: 'hidden' }}>
           {trailer && (
             <iframe
