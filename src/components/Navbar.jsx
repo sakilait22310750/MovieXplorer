@@ -1,3 +1,13 @@
+/**
+ * Navbar Component
+ * Main persistent navigation header providing:
+ * 1. Logo and brand identity
+ * 2. Route links (Home)
+ * 3. Theme mode toggle switch (Dark / Light)
+ * 4. User authentication controls (Sign In, Sign Up, or Username Dropdown with Favorites and Logout)
+ * 5. Responsive mobile drawer menu
+ */
+
 import React, { useState } from 'react';
 import {
   AppBar, Toolbar, Typography, Box, IconButton, Switch,
@@ -24,8 +34,13 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [authMode, setAuthMode] = useState(null); // 'login', 'register', null
+  // Auth modal controller ('login' | 'register' | null)
+  const [authMode, setAuthMode] = useState(null);
+  
+  // Mobile drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
+  
+  // User profile dropdown anchor element
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openAuth = (mode) => {
@@ -51,7 +66,7 @@ export default function Navbar() {
       <AppBar position="sticky" elevation={0}>
         <Toolbar sx={{ gap: 1, minHeight: '60px !important' }}>
 
-          {/* Logo */}
+          {/* ── Brand Logo ── */}
           <Typography
             variant="h6"
             fontWeight={900}
@@ -68,7 +83,7 @@ export default function Navbar() {
             🎬 MovieXplorer
           </Typography>
 
-          {/* Desktop Nav Links */}
+          {/* ── Desktop Navigation Links ── */}
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 0.5, flexGrow: 1 }}>
               {navLinks.map((link) => (
@@ -94,7 +109,7 @@ export default function Navbar() {
 
           {isMobile && <Box sx={{ flexGrow: 1 }} />}
 
-{/* Dark Mode Toggle */}
+          {/* ── Dark / Light Theme Mode Switch ── */}
           <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mx: 0.5 }}>
               <LightMode fontSize="small" sx={{ color: 'text.secondary' }} />
@@ -111,10 +126,11 @@ export default function Navbar() {
             </Box>
           </Tooltip>
 
-          {/* Login / Profile Buttons */}
+          {/* ── Desktop Auth / User Profile Controls ── */}
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 1, ml: 1 }}>
               {currentUser ? (
+                  // Logged-in view: Shows username button with dropdown menu
                   <>
                     <Button
                       variant="outlined"
@@ -145,6 +161,7 @@ export default function Navbar() {
                     </Menu>
                   </>
                 ) : (
+                // Guest view: Sign In and Sign Up buttons
                 <>
                   <Button
                     variant="text"
@@ -171,7 +188,7 @@ export default function Navbar() {
             </Box>
           )}
 
-          {/* Mobile Hamburger */}
+          {/* ── Mobile Hamburger Menu Button ── */}
           {isMobile && (
             <IconButton color="inherit" onClick={() => setDrawerOpen(true)}>
               <MenuIcon />
@@ -180,7 +197,7 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* Mobile Drawer */}
+      {/* ── Mobile Drawer Navigation Panel ── */}
       <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}
         PaperProps={{ sx: { bgcolor: 'background.paper', width: 230 } }}>
         <Box sx={{ pt: 2 }}>
@@ -223,7 +240,7 @@ export default function Navbar() {
         </Box>
       </Drawer>
 
-      {/* Login/Register Dialog */}
+      {/* ── Reusable Authentication Dialog Modal ── */}
       <AuthModal authMode={authMode} setAuthMode={setAuthMode} />
     </>
   );

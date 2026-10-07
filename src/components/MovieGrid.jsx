@@ -1,3 +1,9 @@
+/**
+ * MovieGrid Component
+ * Displays a responsive grid of movie cards with skeleton loading placeholders,
+ * error handling, empty states, and centered "Load More" pagination.
+ */
+
 import React from 'react';
 import {
   Grid, Box, Typography, Skeleton, Alert, Button,
@@ -8,16 +14,18 @@ import MovieCard from './MovieCard';
 import { useMovie } from '../context/MovieContext';
 
 export default function MovieGrid({ movies, title, emptyMessage }) {
+  // Consume global search and pagination state from context
   const {
     searchLoading, searchError, searchResults,
     currentPage, totalPages, loadMoreMovies,
   } = useMovie();
 
+  // Use explicitly provided movies list (e.g. from favorites) or fallback to global search results
   const displayMovies = movies || searchResults;
   const loading = searchLoading;
   const error = searchError;
 
-  // Skeleton placeholders
+  // 1. Initial Loading State: Render animated skeleton cards
   if (loading && displayMovies.length === 0) {
     return (
       <Box>
@@ -35,6 +43,7 @@ export default function MovieGrid({ movies, title, emptyMessage }) {
     );
   }
 
+  // 2. Error State: Render alert banner if search fails
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -43,6 +52,7 @@ export default function MovieGrid({ movies, title, emptyMessage }) {
     );
   }
 
+  // 3. Empty State: Render helpful message when no movies match query
   if (!loading && displayMovies.length === 0) {
     return (
       <Box textAlign="center" py={6}>
@@ -53,13 +63,17 @@ export default function MovieGrid({ movies, title, emptyMessage }) {
     );
   }
 
+  // 4. Main Grid & Pagination Rendering
   return (
     <Box sx={{ width: '100%' }}>
+      {/* Optional section title */}
       {title && (
         <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
           {title}
         </Typography>
       )}
+
+      {/* Responsive Movie Cards Grid */}
       <Grid container spacing={2}>
         {displayMovies.map((movie) => (
           <Grid item xs={6} sm={4} md={3} lg={2} key={movie.id}>
@@ -68,7 +82,7 @@ export default function MovieGrid({ movies, title, emptyMessage }) {
         ))}
       </Grid>
 
-      {/* Load More Button - Centered Horizontally */}
+      {/* Centered "Load More" Pagination Button for Search/Discover results */}
       {!movies && currentPage < totalPages && (
         <Box
           sx={{

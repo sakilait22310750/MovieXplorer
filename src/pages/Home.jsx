@@ -1,3 +1,12 @@
+/**
+ * Home Page
+ * Main landing page featuring:
+ * 1. Plex-style Cinematic Hero with animated poster collage and elegant title banner
+ * 2. SearchBar with instant autocompletion and collapsible filters
+ * 3. Search results MovieGrid when active
+ * 4. Trending Section with "Trending This Week" + 5 Genre Carousels (Action, Comedy, Horror, Sci-Fi, Animation) when idle
+ */
+
 import React, { useEffect, useState } from 'react';
 import { Container, Box, Typography, Divider } from '@mui/material';
 import SearchBar from '../components/SearchBar';
@@ -10,7 +19,7 @@ export default function Home() {
   const { lastSearch, searchResults, setLastSearch, setSearchResults, setSearchParams } = useMovie();
   const [heroPosterUrls, setHeroPosterUrls] = useState([]);
 
-  // Clear last search on mount so homepage always shows trending movies
+  // 1. Reset any leftover search queries when returning to Home so trending carousels display cleanly
   useEffect(() => {
     setLastSearch('');
     setSearchResults([]);
@@ -18,7 +27,7 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch trending movies for the hero poster collage background
+  // 2. Fetch top trending movie posters to build the dynamic background collage
   useEffect(() => {
     getTrending()
       .then((res) => {
@@ -33,7 +42,7 @@ export default function Home() {
 
   return (
     <Box>
-      {/* ── Plex-style Hero ── */}
+      {/* ── 1. Plex-Style Cinematic Hero Header ── */}
       <Box
         sx={{
           position: 'relative',
@@ -44,7 +53,7 @@ export default function Home() {
           bgcolor: '#0d0d0d',
         }}
       >
-        {/* Poster collage — right side */}
+        {/* Dynamic Poster Collage — Right-Aligned Background */}
         {heroPosterUrls.length > 0 && (
           <Box
             sx={{
@@ -61,7 +70,7 @@ export default function Home() {
               pointerEvents: 'none',
             }}
           >
-            {/* Column 1 */}
+            {/* Collage Column 1 */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mt: '-40px' }}>
               {heroPosterUrls.slice(0, 6).map((url, i) => (
                 <Box
@@ -73,7 +82,7 @@ export default function Home() {
                 />
               ))}
             </Box>
-            {/* Column 2 */}
+            {/* Collage Column 2 */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mt: '30px' }}>
               {heroPosterUrls.slice(6, 12).map((url, i) => (
                 <Box
@@ -85,7 +94,7 @@ export default function Home() {
                 />
               ))}
             </Box>
-            {/* Column 3 */}
+            {/* Collage Column 3 */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mt: '-20px' }}>
               {heroPosterUrls.slice(12, 18).map((url, i) => (
                 <Box
@@ -100,7 +109,7 @@ export default function Home() {
           </Box>
         )}
 
-        {/* Dark gradient overlay — left fade */}
+        {/* Dark Vignette Gradient Overlay */}
         <Box
           sx={{
             position: 'absolute',
@@ -110,7 +119,7 @@ export default function Home() {
           }}
         />
 
-        {/* Hero text — left side */}
+        {/* Hero Branding & Headline Typography */}
         <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 2, py: 6 }}>
           <Box sx={{ maxWidth: 520 }}>
             <Typography
@@ -131,11 +140,11 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* ── Search + Content ── */}
+      {/* ── 2. Search Bar + Content Sections ── */}
       <Container maxWidth="xl" sx={{ py: 4 }} id="search-section">
         <SearchBar />
 
-        {/* Search Results */}
+        {/* Search Results Display View (Active Query) */}
         {searchResults.length > 0 && (
           <Box mb={5}>
             <Divider sx={{ mb: 3, borderColor: '#333' }} />
@@ -143,7 +152,7 @@ export default function Home() {
           </Box>
         )}
 
-        {/* Trending Section */}
+        {/* Default Browse View: Trending This Week + 5 Genre Carousels (Idle) */}
         {searchResults.length === 0 && <TrendingSection />}
       </Container>
     </Box>

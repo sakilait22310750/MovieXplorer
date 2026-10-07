@@ -1,13 +1,28 @@
 import { createTheme } from '@mui/material/styles';
 
+/**
+ * Brand color constants:
+ * Inspired by Plex's signature amber/gold branding palette.
+ */
 const PLEX_YELLOW = '#E5A00D';
 const PLEX_YELLOW_DARK = '#C8880A';
 
+/**
+ * Material UI Light Theme Configuration
+ *
+ * Defines color palettes, typography, and component overrides for light mode.
+ */
 export const lightTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: PLEX_YELLOW, dark: PLEX_YELLOW_DARK, contrastText: '#000' },
-    secondary: { main: '#1a1a1a' },
+    primary: { 
+      main: PLEX_YELLOW, 
+      dark: PLEX_YELLOW_DARK, 
+      contrastText: '#000000' 
+    },
+    secondary: { 
+      main: '#1a1a1a' 
+    },
     background: {
       default: '#f0f0f0',
       paper: '#ffffff',
@@ -17,6 +32,7 @@ export const lightTheme = createTheme({
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   components: {
+    // Custom card elevation and hover micro-interactions
     MuiCard: {
       styleOverrides: {
         root: {
@@ -29,24 +45,45 @@ export const lightTheme = createTheme({
         },
       },
     },
+    // Button styling defaults
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 6, textTransform: 'none', fontWeight: 700 },
+        root: { 
+          borderRadius: 6, 
+          textTransform: 'none', 
+          fontWeight: 700 
+        },
       },
     },
+    // Navigation bar light theme styling
     MuiAppBar: {
       styleOverrides: {
-        root: { backgroundColor: '#ffffff', color: '#111111', borderBottom: '1px solid #e0e0e0' },
+        root: { 
+          backgroundColor: '#ffffff', 
+          color: '#111111', 
+          borderBottom: '1px solid #e0e0e0' 
+        },
       },
     },
   },
 });
 
+/**
+ * Material UI Dark Theme Configuration
+ *
+ * Defines color palettes, typography, and component overrides for dark mode.
+ */
 export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
-    primary: { main: PLEX_YELLOW, dark: PLEX_YELLOW_DARK, contrastText: '#000' },
-    secondary: { main: '#cccccc' },
+    primary: { 
+      main: PLEX_YELLOW, 
+      dark: PLEX_YELLOW_DARK, 
+      contrastText: '#000000' 
+    },
+    secondary: { 
+      main: '#cccccc' 
+    },
     background: {
       default: '#111111',
       paper: '#1f1f1f',
@@ -60,6 +97,7 @@ export const darkTheme = createTheme({
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
   },
   components: {
+    // Custom dark card styling with glowing gold elevation on hover
     MuiCard: {
       styleOverrides: {
         root: {
@@ -73,14 +111,23 @@ export const darkTheme = createTheme({
         },
       },
     },
+    // Button styling defaults
     MuiButton: {
       styleOverrides: {
-        root: { borderRadius: 6, textTransform: 'none', fontWeight: 700 },
+        root: { 
+          borderRadius: 6, 
+          textTransform: 'none', 
+          fontWeight: 700 
+        },
       },
     },
+    // Navigation bar dark theme styling
     MuiAppBar: {
       styleOverrides: {
-        root: { backgroundColor: '#111111', borderBottom: '1px solid #2a2a2a' },
+        root: { 
+          backgroundColor: '#111111', 
+          borderBottom: '1px solid #2a2a2a' 
+        },
       },
     },
   },

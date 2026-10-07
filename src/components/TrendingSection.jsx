@@ -1,3 +1,11 @@
+/**
+ * TrendingSection Component
+ * Renders horizontal carousel rows for:
+ * 1. Trending This Week (top global movies)
+ * 2. 5 Popular Genres: Action, Comedy, Horror, Sci-Fi, and Animation
+ * Each row features poster cards, rating badges, favorite toggles, and smooth scroll buttons.
+ */
+
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Box, Typography, Card, CardMedia, Chip, Skeleton,
@@ -16,8 +24,12 @@ import { useNavigate } from 'react-router-dom';
 import { getTrending, getMoviesByGenre, getImageUrl } from '../api/tmdb';
 import { useMovie } from '../context/MovieContext';
 
+// Fallback poster when image path is missing
 const PLACEHOLDER = 'https://via.placeholder.com/300x450?text=No+Image';
 
+/**
+ * Reusable horizontal scroll carousel row for any movie category or genre.
+ */
 function MovieCarouselRow({ title, icon, fetchMovies }) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +37,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useMovie();
 
+  // Load movies on mount or when fetchMovies function changes
   useEffect(() => {
     let isMounted = true;
     fetchMovies()
@@ -40,6 +53,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
     };
   }, [fetchMovies]);
 
+  // Smooth scroll left (-1) or right (+1)
   const scroll = (dir) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: dir * 350, behavior: 'smooth' });
@@ -48,7 +62,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
 
   return (
     <Box sx={{ mb: 4.5 }}>
-      {/* Section Title */}
+      {/* ── Category Header ── */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
         {icon}
         <Typography variant="h6" fontWeight={700}>
@@ -56,8 +70,9 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
         </Typography>
       </Box>
 
+      {/* ── Carousel Container with Navigation Arrows ── */}
       <Box sx={{ position: 'relative' }}>
-        {/* Left Scroll Arrow */}
+        {/* Left Arrow Button */}
         <IconButton
           onClick={() => scroll(-1)}
           aria-label={`Scroll ${title} left`}
@@ -70,7 +85,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
           <ChevronLeft />
         </IconButton>
 
-        {/* Scrollable Movie Row */}
+        {/* Scrollable Track */}
         <Box
           ref={scrollRef}
           sx={{
@@ -95,6 +110,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
                     }}
                     onClick={() => navigate(`/movie/${movie.id}`)}
                   >
+                    {/* Poster Image */}
                     <CardMedia
                       component="img"
                       image={getImageUrl(movie.poster_path) || PLACEHOLDER}
@@ -103,7 +119,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
                       onError={(e) => { e.target.src = PLACEHOLDER; }}
                     />
 
-                    {/* Rating chip */}
+                    {/* Rating Chip */}
                     <Chip
                       icon={<StarIcon sx={{ fontSize: '12px !important', color: '#E5A00D !important' }} />}
                       label={movie.vote_average ? movie.vote_average.toFixed(1) : 'NR'}
@@ -115,7 +131,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
                       }}
                     />
 
-                    {/* Favorite Button */}
+                    {/* Favorite Heart Button */}
                     <Tooltip title={fav ? 'Remove from Favorites' : 'Add to Favorites'}>
                       <IconButton
                         size="small"
@@ -134,6 +150,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
                       </IconButton>
                     </Tooltip>
 
+                    {/* Movie Caption */}
                     <Box sx={{ p: 0.8 }}>
                       <Typography variant="caption" fontWeight={600} noWrap display="block">
                         {movie.title}
@@ -147,7 +164,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
               })}
         </Box>
 
-        {/* Right Scroll Arrow */}
+        {/* Right Arrow Button */}
         <IconButton
           onClick={() => scroll(1)}
           aria-label={`Scroll ${title} right`}
@@ -164,6 +181,7 @@ function MovieCarouselRow({ title, icon, fetchMovies }) {
   );
 }
 
+// 5 Featured Trending Genre configurations
 const GENRE_CONFIG = [
   { id: 28, title: 'Action', icon: <ActionIcon sx={{ color: '#E5A00D' }} /> },
   { id: 35, title: 'Comedy', icon: <ComedyIcon sx={{ color: '#E5A00D' }} /> },
@@ -177,7 +195,7 @@ export default function TrendingSection() {
 
   return (
     <Box sx={{ mb: 6 }}>
-      {/* 1. Trending This Week */}
+      {/* 1. Global Trending This Week */}
       <MovieCarouselRow
         title="Trending This Week"
         icon={<FireIcon sx={{ color: '#E5A00D' }} />}

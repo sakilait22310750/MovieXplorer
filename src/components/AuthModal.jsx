@@ -6,6 +6,10 @@ import {
 import { Visibility, VisibilityOff, Close as CloseIcon } from '@mui/icons-material';
 import { useMovie } from '../context/MovieContext';
 
+/**
+ * High-resolution movie posters used for the auto-cycling left-panel collage
+ * in the desktop authentication modal.
+ */
 const POSTERS = [
   'https://image.tmdb.org/t/p/w780/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg', // Deadpool & Wolverine
   'https://image.tmdb.org/t/p/w780/1E5baAaEse26fej7uHcjOgEE2t2.jpg', // Fast X
@@ -13,17 +17,34 @@ const POSTERS = [
   'https://image.tmdb.org/t/p/w780/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg', // Avengers: Infinity War
 ];
 
+/**
+ * AuthModal Component
+ *
+ * Provides a responsive dialog for user authentication supporting both "Sign In" and
+ * "Sign Up" modes. Features a Plex-style split layout on desktop with cycling background
+ * posters and interactive form validation.
+ *
+ * @param {Object} props
+ * @param {'login'|'register'|null} props.authMode - Active modal mode or null if closed
+ * @param {Function} props.setAuthMode - Setter function to update or close the auth mode
+ */
 export default function AuthModal({ authMode, setAuthMode }) {
+  // Global auth actions from MovieContext
   const { login, register } = useMovie();
   const theme = useTheme();
+  // Check if viewport is mobile/tablet (< 900px) to hide left graphic banner
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Local state for poster carousel, password visibility, form fields, and errors
   const [posterIndex, setPosterIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [authForm, setAuthForm] = useState({ email: '', username: '', password: '' });
   const [authError, setAuthError] = useState('');
 
-  // Auto-change poster
+  /**
+   * Auto-cycling poster carousel effect:
+   * Advances the background poster every 4 seconds while the dialog remains open.
+   */
   useEffect(() => {
     if (!authMode) return;
     const interval = setInterval(() => {
@@ -32,6 +53,9 @@ export default function AuthModal({ authMode, setAuthMode }) {
     return () => clearInterval(interval);
   }, [authMode]);
 
+  /**
+   * Reset form fields, error messages, and close modal.
+   */
   const handleClose = () => {
     setAuthMode(null);
     setAuthForm({ email: '', username: '', password: '' });
@@ -40,13 +64,20 @@ export default function AuthModal({ authMode, setAuthMode }) {
 
   const isLogin = authMode === 'login';
 
+  /**
+   * Form submission handler:
+   * Validates required fields, triggers login or register in MovieContext,
+   * and updates error state or closes modal on success.
+   */
   const handleSubmit = () => {
     setAuthError('');
+    // Ensure all mandatory fields are filled
     if (!authForm.email || !authForm.password || (!isLogin && !authForm.username)) {
       setAuthError('Please fill in all fields');
       return;
     }
     
+    // Execute authentication operation
     let result;
     if (isLogin) {
       result = login(authForm.email, authForm.password);
@@ -54,6 +85,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
       result = register(authForm.email, authForm.username, authForm.password);
     }
 
+    // Dismiss modal on success or display error message
     if (result.success) {
       handleClose();
     } else {
@@ -61,7 +93,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
     }
   };
 
-    return (
+  return (
     <Dialog 
       open={!!authMode} 
       onClose={handleClose} 
@@ -78,7 +110,9 @@ export default function AuthModal({ authMode, setAuthMode }) {
         }
       }}
     >
-      {/* LEFT SIDE (Posters & Text) - Hidden on mobile */}
+      {/* =========================================================================
+          LEFT SIDE (Poster Carousel & Plex-style Intro) - Hidden on Mobile (< md)
+          ========================================================================= */}
       {!isMobile && (
         <Box 
           sx={{ 
@@ -90,6 +124,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
             p: 4,
             color: '#fff',
             textAlign: 'center',
+            // Dynamic cycling poster background
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -100,6 +135,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
               transition: 'background-image 1s ease-in-out',
               zIndex: 0,
             },
+            // Dark gradient overlay for typography readability
             '&::after': {
               content: '""',
               position: 'absolute',
@@ -109,6 +145,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
             }
           }}
         >
+          {/* Hero Branding Content */}
           <Box sx={{ position: 'relative', zIndex: 2, mt: 4 }}>
             <Typography variant="h4" fontWeight="bold" gutterBottom>
               Let the streaming begin
@@ -120,7 +157,9 @@ export default function AuthModal({ authMode, setAuthMode }) {
         </Box>
       )}
 
-      {/* RIGHT SIDE (Form) */}
+      {/* =========================================================================
+          RIGHT SIDE (Form Fields: Email, Username, Password, Submission)
+          ========================================================================= */}
       <Box 
         sx={{ 
           width: { xs: '100%', md: '55%' }, 
@@ -133,6 +172,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           color: 'text.primary'
         }}
       >
+        {/* Dismiss modal close button */}
         <IconButton 
           onClick={handleClose} 
           sx={{ position: 'absolute', top: 16, right: 16, color: 'text.secondary' }}
@@ -140,6 +180,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           <CloseIcon />
         </IconButton>
 
+        {/* Modal Heading Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             {isLogin ? 'Sign In' : 'Create your free account'}
@@ -151,18 +192,21 @@ export default function AuthModal({ authMode, setAuthMode }) {
           )}
         </Box>
 
+        {/* Legal Disclaimer for Registration */}
         {!isLogin && (
           <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
             By signing up or continuing to use MovieXplorer you confirm that you've read and accept the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>.
           </Typography>
         )}
 
+        {/* Error Notification Alert */}
         {authError && (
           <Typography color="error" variant="body2" align="center" sx={{ mb: 2 }}>
             {authError}
           </Typography>
         )}
 
+        {/* Email Input Field */}
         <TextField
           label="Email address"
           value={authForm.email}
@@ -174,6 +218,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           sx={{ '& .MuiInput-underline:after': { borderBottomColor: '#E5A00D' } }}
         />
 
+        {/* Username Field (Sign Up Mode Only) */}
         {!isLogin && (
           <TextField
             label="Username"
@@ -186,6 +231,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           />
         )}
 
+        {/* Password Input Field with Visibility Adornment */}
         <TextField
           label={isLogin ? "Password" : "Create password"}
           type={showPassword ? 'text' : 'password'}
@@ -208,7 +254,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           sx={{ '& .MuiInput-underline:after': { borderBottomColor: '#E5A00D' } }}
         />
 
-        {/* Password Requirements (Mockup) */}
+        {/* Password Requirement Checkers (Sign Up Mode Only) */}
         {!isLogin && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2, mb: 4 }}>
             <Typography variant="caption" sx={{ color: authForm.password.length >= 10 ? 'success.main' : 'text.secondary' }}>
@@ -226,6 +272,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           </Box>
         )}
 
+        {/* Submit Action Button */}
         <Button
           variant="contained"
           fullWidth
@@ -245,6 +292,7 @@ export default function AuthModal({ authMode, setAuthMode }) {
           {isLogin ? 'Sign In' : 'Create an Account'}
         </Button>
 
+        {/* Switch Between Sign In and Sign Up Mode */}
         <Box sx={{ textAlign: 'center' }}>
           {isLogin ? (
             <Typography variant="body2" color="text.secondary">
@@ -260,4 +308,3 @@ export default function AuthModal({ authMode, setAuthMode }) {
     </Dialog>
   );
 }
-

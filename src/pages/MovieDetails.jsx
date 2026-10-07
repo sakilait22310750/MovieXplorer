@@ -19,6 +19,13 @@ import {
 import { getMovieDetails, getImageUrl } from '../api/tmdb';
 import { useMovie } from '../context/MovieContext';
 
+/**
+ * Generates a deterministic background color for user avatars based on the author's name string.
+ * Ensures the same user name always renders with the same color badge.
+ *
+ * @param {string} name - The user or author name
+ * @returns {string} Hex color code
+ */
 const getAvatarColor = (name = '') => {
   const colors = ['#f4511e', '#8e24aa', '#039be5', '#43a047', '#e53935', '#fb8c00', '#5e35b1', '#00acc1'];
   let hash = 0;
@@ -28,32 +35,56 @@ const getAvatarColor = (name = '') => {
   return colors[Math.abs(hash) % colors.length];
 };
 
+/**
+ * Formats an ISO date string into a user-friendly format (e.g. "October 7, 2026").
+ *
+ * @param {string} dateStr - Raw date string
+ * @returns {string} Formatted date string
+ */
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 };
 
+/**
+ * MovieDetails Component
+ *
+ * Detailed view for an individual movie featuring:
+ * - Full-bleed cinematic hero backdrop with gradient vignette.
+ * - Comprehensive metadata (release year, runtime, star rating, genre pills).
+ * - Direct YouTube trailer modal playback.
+ * - One-click bookmarking/favorites toggle.
+ * - Single-row horizontal cast carousel with left/right navigation controls.
+ * - Horizontal carousel of user ratings and reviews with expandable modal reading view.
+ */
 export default function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useMovie();
   
+  // References for horizontal scrolling carousels
   const scrollRef = useRef(null);
   const reviewScrollRef = useRef(null);
 
+  // Component state
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
 
+  // Cast carousel scroll arrow visibility flags
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
+  // Reviews carousel scroll arrow visibility flags
   const [canReviewScrollLeft, setCanReviewScrollLeft] = useState(false);
   const [canReviewScrollRight, setCanReviewScrollRight] = useState(true);
 
+  /**
+   * Fetches full movie details including credits, videos, and reviews on initial mount or route param change.
+   */
   useEffect(() => {
     window.scrollTo(0, 0);
     setLoading(true);
@@ -63,6 +94,9 @@ export default function MovieDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  /**
+   * Evaluates the scroll position of the Cast carousel to show or hide the left/right arrow buttons.
+   */
   const checkScroll = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
@@ -71,6 +105,9 @@ export default function MovieDetails() {
     }
   };
 
+  /**
+   * Evaluates the scroll position of the Reviews carousel to show or hide the left/right arrow buttons.
+   */
   const checkReviewScroll = () => {
     if (reviewScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = reviewScrollRef.current;
@@ -79,6 +116,9 @@ export default function MovieDetails() {
     }
   };
 
+  /**
+   * Initial check for carousel scroll boundaries once movie data is loaded.
+   */
   useEffect(() => {
     if (movie) {
       const timer = setTimeout(() => {
@@ -89,6 +129,11 @@ export default function MovieDetails() {
     }
   }, [movie]);
 
+  /**
+   * Smoothly scrolls the cast row horizontally by a fixed offset.
+   *
+   * @param {'left'|'right'} direction - Scrolling direction
+   */
   const scroll = (direction) => {
     if (scrollRef.current) {
       const scrollAmount = direction === 'left' ? -420 : 420;
@@ -97,6 +142,11 @@ export default function MovieDetails() {
     }
   };
 
+  /**
+   * Smoothly scrolls the reviews row horizontally by a fixed offset.
+   *
+   * @param {'left'|'right'} direction - Scrolling direction
+   */
   const scrollReviews = (direction) => {
     if (reviewScrollRef.current) {
       const scrollAmount = direction === 'left' ? -460 : 460;
@@ -105,6 +155,7 @@ export default function MovieDetails() {
     }
   };
 
+  // Loading state placeholder spinner
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="70vh">
@@ -113,6 +164,7 @@ export default function MovieDetails() {
     );
   }
 
+  // Error alert with back navigation button
   if (error) {
     return (
       <Container maxWidth="md" sx={{ py: 6 }}>
@@ -126,6 +178,7 @@ export default function MovieDetails() {
 
   if (!movie) return null;
 
+  // Computed movie metadata
   const fav = isFavorite(movie.id);
   const trailer = movie.videos?.results?.find(
     (v) => v.type === 'Trailer' && v.site === 'YouTube'
@@ -139,7 +192,9 @@ export default function MovieDetails() {
 
   return (
     <Box sx={{ position: 'relative', minHeight: '100vh', width: '100%', overflowX: 'hidden', backgroundColor: '#0a0a0c' }}>
-      {/* Background Hero Backdrop Layer */}
+      {/* =========================================================================
+          BACKGROUND HERO BACKDROP LAYER
+          ========================================================================= */}
       {movie.backdrop_path && (
         <Box
           sx={{
@@ -159,7 +214,9 @@ export default function MovieDetails() {
         />
       )}
 
-      {/* Atmospheric Cinematic Gradient Overlay */}
+      {/* =========================================================================
+          ATMOSPHERIC CINEMATIC GRADIENT OVERLAY
+          ========================================================================= */}
       <Box
         sx={{
           position: 'absolute',
@@ -187,7 +244,9 @@ export default function MovieDetails() {
         }}
       />
 
-      {/* Content Layer */}
+      {/* =========================================================================
+          FOREGROUND CONTENT CONTAINER
+          ========================================================================= */}
       <Container 
         maxWidth="xl" 
         sx={{ 
@@ -201,7 +260,7 @@ export default function MovieDetails() {
           minHeight: '100vh',
         }}
       >
-        {/* Back Button */}
+        {/* Floating Glassmorphism Back Navigation Button */}
         <Button 
           startIcon={<ArrowBack sx={{ fontSize: 18 }} />} 
           onClick={() => navigate(-1)} 
@@ -231,7 +290,7 @@ export default function MovieDetails() {
 
         {/* Hero Movie Details Column */}
         <Box sx={{ maxWidth: { xs: '100%', md: '650px' } }}>
-          {/* Title */}
+          {/* Movie Title */}
           <Typography 
             variant="h1" 
             sx={{ 
@@ -247,7 +306,7 @@ export default function MovieDetails() {
             {movie.title}
           </Typography>
 
-          {/* Tagline */}
+          {/* Optional Tagline */}
           {movie.tagline && (
             <Typography 
               variant="subtitle1" 
@@ -265,7 +324,7 @@ export default function MovieDetails() {
             </Typography>
           )}
 
-          {/* Unified, Clean Metadata Row */}
+          {/* Unified Metadata Row (Year, Runtime, Rating, Genre tags) */}
           <Box 
             sx={{ 
               display: 'flex', 
@@ -275,25 +334,25 @@ export default function MovieDetails() {
               mb: 3.5 
             }}
           >
-            {/* Year */}
+            {/* Release Year */}
             {movie.release_date && (
               <Typography sx={{ color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600, fontSize: '0.95rem' }}>
                 {movie.release_date.slice(0, 4)}
               </Typography>
             )}
 
-            {/* Dot separator */}
+            {/* Separator Dot */}
             <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
 
-            {/* Runtime */}
+            {/* Runtime Duration */}
             <Typography sx={{ color: 'rgba(255, 255, 255, 0.85)', fontWeight: 600, fontSize: '0.95rem' }}>
               {runtime}
             </Typography>
 
-            {/* Dot separator */}
+            {/* Separator Dot */}
             <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
 
-            {/* Sleek Rating Badge */}
+            {/* Sleek Golden Rating Badge */}
             <Box
               sx={{
                 display: 'inline-flex',
@@ -313,7 +372,7 @@ export default function MovieDetails() {
               </Typography>
             </Box>
 
-            {/* Genres as elegant pill tags */}
+            {/* Genres Pill Tags */}
             {genres.length > 0 && (
               <>
                 <Box sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.35)' }} />
@@ -341,7 +400,7 @@ export default function MovieDetails() {
             )}
           </Box>
 
-          {/* Action Buttons Row */}
+          {/* Action Buttons: Watch Trailer & Add/Remove Favorite */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
             {trailer ? (
               <Button
@@ -392,7 +451,7 @@ export default function MovieDetails() {
               </Button>
             )}
 
-            {/* Favorite Action Button */}
+            {/* Favorite Toggle Button */}
             <IconButton
               onClick={() => toggleFavorite(movie)}
               title={fav ? 'Remove from Favorites' : 'Add to Favorites'}
@@ -416,7 +475,7 @@ export default function MovieDetails() {
             </IconButton>
           </Box>
 
-          {/* Overview Synopsis */}
+          {/* Movie Overview Synopsis */}
           <Typography 
             variant="body1" 
             sx={{ 
@@ -433,10 +492,12 @@ export default function MovieDetails() {
           </Typography>
         </Box>
 
-        {/* Cast Section */}
+        {/* =========================================================================
+            CAST SECTION (Horizontal Carousel with Navigation Controls)
+            ========================================================================= */}
         {cast.length > 0 && (
           <Box sx={{ mt: 2, mb: 5, width: '100%', position: 'relative' }}>
-            {/* Header with clickable chevron */}
+            {/* Header with interactive chevron */}
             <Box 
               sx={{ 
                 display: 'inline-flex', 
@@ -457,7 +518,7 @@ export default function MovieDetails() {
             </Box>
 
             <Box sx={{ position: 'relative', width: '100%' }}>
-              {/* Left Scroll Arrow */}
+              {/* Left Carousel Navigation Arrow */}
               {canScrollLeft && (
                 <IconButton
                   onClick={() => scroll('left')}
@@ -488,7 +549,7 @@ export default function MovieDetails() {
                 </IconButton>
               )}
 
-              {/* Single Horizontal Cast Line */}
+              {/* Single Horizontal Row of Cast Cards */}
               <Box 
                 ref={scrollRef}
                 onScroll={checkScroll}
@@ -525,6 +586,7 @@ export default function MovieDetails() {
                       }
                     }}
                   >
+                    {/* Actor Circular Avatar */}
                     <Avatar
                       src={getImageUrl(person.profile_path, 'w185') || undefined}
                       alt={person.name}
@@ -540,6 +602,8 @@ export default function MovieDetails() {
                     >
                       <PersonIcon sx={{ fontSize: { xs: 45, sm: 58 } }} />
                     </Avatar>
+
+                    {/* Actor Name */}
                     <Typography 
                       variant="body2" 
                       fontWeight={700} 
@@ -557,6 +621,8 @@ export default function MovieDetails() {
                     >
                       {person.name}
                     </Typography>
+
+                    {/* Character Role Name */}
                     <Typography 
                       variant="caption" 
                       sx={{ 
@@ -576,7 +642,7 @@ export default function MovieDetails() {
                 ))}
               </Box>
 
-              {/* Right Scroll Arrow */}
+              {/* Right Carousel Navigation Arrow */}
               {canScrollRight && (
                 <IconButton
                   onClick={() => scroll('right')}
@@ -610,10 +676,12 @@ export default function MovieDetails() {
           </Box>
         )}
 
-        {/* Ratings & Reviews Section (matching reference image) */}
+        {/* =========================================================================
+            RATINGS & REVIEWS SECTION (Horizontal Carousel with Expandable Modal)
+            ========================================================================= */}
         {reviews.length > 0 && (
           <Box sx={{ mt: 3, width: '100%', position: 'relative' }}>
-            {/* Header with chevron */}
+            {/* Header with interactive chevron */}
             <Box 
               sx={{ 
                 display: 'inline-flex', 
@@ -634,7 +702,7 @@ export default function MovieDetails() {
             </Box>
 
             <Box sx={{ position: 'relative', width: '100%' }}>
-              {/* Left Scroll Arrow */}
+              {/* Left Carousel Navigation Arrow */}
               {canReviewScrollLeft && (
                 <IconButton
                   onClick={() => scrollReviews('left')}
@@ -665,7 +733,7 @@ export default function MovieDetails() {
                 </IconButton>
               )}
 
-              {/* Horizontal Scroll Cards Row */}
+              {/* Horizontal Row of Review Cards */}
               <Box 
                 ref={reviewScrollRef}
                 onScroll={checkReviewScroll}
@@ -718,7 +786,7 @@ export default function MovieDetails() {
                         }
                       }}
                     >
-                      {/* Top: Avatar, Name & Date */}
+                      {/* Top: User Avatar, Name & Date */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                         <Avatar
                           src={avatarSrc || undefined}
@@ -747,7 +815,7 @@ export default function MovieDetails() {
                         </Box>
                       </Box>
 
-                      {/* Middle: Star Rating & Review snippet */}
+                      {/* Middle: Star Rating & Excerpt Snippet */}
                       <Box sx={{ mb: 2 }}>
                         <Rating 
                           value={ratingVal} 
@@ -776,7 +844,7 @@ export default function MovieDetails() {
                         </Typography>
                       </Box>
 
-                      {/* Bottom Footer: Reactions */}
+                      {/* Bottom Footer: Thumbs up, Comment icons, and "Read more" trigger */}
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pt: 1, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.8 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6, color: 'rgba(255,255,255,0.5)' }}>
@@ -795,7 +863,7 @@ export default function MovieDetails() {
                 })}
               </Box>
 
-              {/* Right Scroll Arrow */}
+              {/* Right Carousel Navigation Arrow */}
               {canReviewScrollRight && (
                 <IconButton
                   onClick={() => scrollReviews('right')}
@@ -830,7 +898,9 @@ export default function MovieDetails() {
         )}
       </Container>
 
-      {/* Cinematic Trailer Dialog */}
+      {/* =========================================================================
+          CINEMATIC TRAILER DIALOG (Responsive YouTube Iframe Player)
+          ========================================================================= */}
       <Dialog 
         open={trailerOpen} 
         onClose={() => setTrailerOpen(false)} 
@@ -861,7 +931,9 @@ export default function MovieDetails() {
         </DialogContent>
       </Dialog>
 
-      {/* Full Review Dialog Modal */}
+      {/* =========================================================================
+          FULL REVIEW DIALOG MODAL (Detailed reader view for selected review)
+          ========================================================================= */}
       <Dialog
         open={Boolean(selectedReview)}
         onClose={() => setSelectedReview(null)}
@@ -880,6 +952,7 @@ export default function MovieDetails() {
       >
         {selectedReview && (
           <>
+            {/* Modal Title Header */}
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Avatar
@@ -903,6 +976,8 @@ export default function MovieDetails() {
                 <CloseIcon />
               </IconButton>
             </DialogTitle>
+
+            {/* Modal Body: Full review text and rating */}
             <DialogContent sx={{ pt: 1 }}>
               <Rating 
                 value={selectedReview.author_details?.rating ? selectedReview.author_details.rating / 2 : 4} 

@@ -1,3 +1,10 @@
+/**
+ * SearchBar Component
+ * Offers real-time debounced search suggestions via TMDB Autocomplete,
+ * collapsible multi-attribute filter controls (Genre, Release Year, Minimum Rating),
+ * and query execution with auto-routing to Search vs Discover.
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box, TextField, IconButton, InputAdornment, FormControl,
@@ -14,6 +21,7 @@ import { searchMovies, getGenres, getImageUrl, discoverMovies } from '../api/tmd
 import { useMovie } from '../context/MovieContext';
 
 export default function SearchBar() {
+  // Context state bindings
   const {
     lastSearch, setLastSearch,
     setSearchParams,
@@ -21,6 +29,7 @@ export default function SearchBar() {
     setCurrentPage, setTotalPages,
   } = useMovie();
 
+  // Local filter & input state
   const [query, setQuery] = useState(lastSearch || '');
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState('');
@@ -28,21 +37,21 @@ export default function SearchBar() {
   const [selectedRating, setSelectedRating] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   
-  // Suggestion states
+  // Real-time Autocomplete suggestion states
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const inputRef = useRef();
 
-  // Load genres on mount
+  // 1. Fetch available genres list on mount
   useEffect(() => {
     getGenres()
       .then((res) => setGenres(res.data.genres || []))
       .catch(() => {});
   }, []);
 
-  // Debounced fetch for search suggestions
+  // 2. Debounced auto-complete suggestions (triggers after 300ms of user typing)
   useEffect(() => {
     if (!query || !query.trim()) {
       setSuggestions([]);
@@ -52,19 +61,21 @@ export default function SearchBar() {
       setLoadingSuggestions(true);
       try {
         const res = await searchMovies(query.trim(), 1);
-        setSuggestions(res.data.results?.slice(0, 5) || []); // Top 5 suggestions
+        setSuggestions(res.data.results?.slice(0, 5) || []); // Top 5 quick matches
       } catch (err) {
-        // handle silently for suggestions
+        // Silently ignore suggestion errors
       } finally {
         setLoadingSuggestions(false);
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [query]);
 
+  // 3. Main Search / Filter Execution
   const doSearch = async (q = query, page = 1) => {
     const trimmed = q.trim();
+    // If search is completely blank and no filters are set, clear results
     if (!trimmed && !selectedGenre && !selectedYear && !selectedRating) {
       setSearchResults([]);
       setLastSearch('');
@@ -74,20 +85,22 @@ export default function SearchBar() {
     setSearchLoading(true);
     setSearchError('');
     setLastSearch(trimmed || 'Filtered Results');
+    
+    // Save search parameters to context so "Load More" can paginate properly
     setSearchParams({
       query: trimmed,
       genre: selectedGenre,
       year: selectedYear,
       rating: selectedRating,
     });
-    setOpen(false); // Close suggestions on actual search
+    setOpen(false); // Dismiss suggestion dropdown
 
     try {
       let results = [];
       let totalPgs = 1;
 
       if (trimmed) {
-        // Text search (API limits filtering, so we do it client-side)
+        // Keyword text search (with client-side filter refining)
         const res = await searchMovies(trimmed, page);
         results = res.data.results || [];
         totalPgs = res.data.total_pages || 1;
@@ -102,7 +115,7 @@ export default function SearchBar() {
           results = results.filter((m) => m.vote_average >= Number(selectedRating));
         }
       } else {
-        // Discover without text
+        // Multi-attribute Discover query without keyword
         const filters = {};
         if (selectedGenre) filters.with_genres = selectedGenre;
         if (selectedYear) filters.primary_release_year = selectedYear;
@@ -123,6 +136,7 @@ export default function SearchBar() {
     }
   };
 
+  // 4. Reset all search input and filter selections
   const handleClear = () => {
     setQuery('');
     setSuggestions([]);
@@ -140,6 +154,7 @@ export default function SearchBar() {
     inputRef.current?.focus();
   };
 
+  // Generate recent 30 years list for year filter dropdown
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => String(currentYear - i));
   const ratings = ['9', '8', '7', '6', '5'];
@@ -148,7 +163,7 @@ export default function SearchBar() {
     <Box sx={{ mb: 3 }}>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
         
-        {/* Autocomplete for Suggestions */}
+        {/* ── Autocomplete Search Input ── */}
         <Autocomplete
           freeSolo
           fullWidth
@@ -157,7 +172,7 @@ export default function SearchBar() {
           onClose={() => setOpen(false)}
           options={suggestions}
           getOptionLabel={(option) => typeof option === 'string' ? option : (option?.title || '')}
-          filterOptions={(x) => x} // Disable local filtering, we rely on the API
+          filterOptions={(x) => x}
           inputValue={query}
           onInputChange={(event, newInputValue) => {
             setQuery(newInputValue);
@@ -170,13 +185,12 @@ export default function SearchBar() {
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              // Prevent default form submission behavior and run our search
               e.preventDefault();
               doSearch();
             }
           }}
           renderOption={(props, option) => {
-            if (typeof option === 'string') return null; // Defensive check
+            if (typeof option === 'string') return null;
             return (
               <li {...props} key={option?.id || Math.random()} style={{ padding: '8px 16px' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
@@ -239,6 +253,7 @@ export default function SearchBar() {
           )}
         />
 
+        {/* Search Submit Button */}
         <Tooltip title="Search">
           <IconButton
             onClick={() => doSearch()}
@@ -255,6 +270,8 @@ export default function SearchBar() {
             <SearchIcon />
           </IconButton>
         </Tooltip>
+
+        {/* Toggle Filters Button */}
         <Tooltip title="Toggle Filters">
           <IconButton onClick={() => setShowFilters((s) => !s)} color={showFilters ? 'primary' : 'default'} sx={{ flexShrink: 0 }}>
             <TuneIcon />
@@ -262,9 +279,10 @@ export default function SearchBar() {
         </Tooltip>
       </Box>
 
-      {/* Filters */}
+      {/* ── Collapsible Filters Panel ── */}
       <Collapse in={showFilters}>
         <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* Genre Dropdown */}
           <FormControl size="small" sx={{ minWidth: 140 }}>
             <InputLabel>Genre</InputLabel>
             <Select
@@ -279,6 +297,7 @@ export default function SearchBar() {
             </Select>
           </FormControl>
 
+          {/* Release Year Dropdown */}
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Year</InputLabel>
             <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
@@ -287,6 +306,7 @@ export default function SearchBar() {
             </Select>
           </FormControl>
 
+          {/* Minimum Rating Dropdown */}
           <FormControl size="small" sx={{ minWidth: 140 }}>
             <InputLabel>Min Rating</InputLabel>
             <Select value={selectedRating} label="Min Rating" onChange={(e) => setSelectedRating(e.target.value)}>
@@ -295,6 +315,7 @@ export default function SearchBar() {
             </Select>
           </FormControl>
 
+          {/* Reset Filters Chip */}
           {(selectedGenre || selectedYear || selectedRating) && (
             <Chip
               label="Clear Filters"
@@ -305,6 +326,7 @@ export default function SearchBar() {
             />
           )}
 
+          {/* Apply Filters Button */}
           <Button 
             variant="contained" 
             size="small" 

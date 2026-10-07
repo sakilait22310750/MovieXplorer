@@ -1,3 +1,4 @@
+/* Global base styles */
 body {
   margin: 0;
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -5,22 +6,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Box-sizing reset across all elements */
 * {
   box-sizing: border-box;
 }
 
-/* Smooth scrollbar */
+/* Custom smooth dark scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #555;
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #e50914;
+  background: #E5A00D;
 }
