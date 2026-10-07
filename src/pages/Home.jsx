@@ -7,13 +7,14 @@ import { useMovie } from '../context/MovieContext';
 import { getTrending, getImageUrl } from '../api/tmdb';
 
 export default function Home() {
-  const { lastSearch, searchResults, setLastSearch, setSearchResults } = useMovie();
+  const { lastSearch, searchResults, setLastSearch, setSearchResults, setSearchParams } = useMovie();
   const [heroPosterUrls, setHeroPosterUrls] = useState([]);
 
   // Clear last search on mount so homepage always shows trending movies
   useEffect(() => {
     setLastSearch('');
     setSearchResults([]);
+    setSearchParams({ query: '', genre: '', year: '', rating: '' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

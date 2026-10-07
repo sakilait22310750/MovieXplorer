@@ -6,33 +6,16 @@ import {
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import MovieCard from './MovieCard';
 import { useMovie } from '../context/MovieContext';
-import { searchMovies } from '../api/tmdb';
 
 export default function MovieGrid({ movies, title, emptyMessage }) {
   const {
     searchLoading, searchError, searchResults,
-    currentPage, totalPages, setCurrentPage,
-    setSearchResults, setSearchLoading, lastSearch,
+    currentPage, totalPages, loadMoreMovies,
   } = useMovie();
 
   const displayMovies = movies || searchResults;
   const loading = searchLoading;
   const error = searchError;
-
-  const handleLoadMore = async () => {
-    if (currentPage >= totalPages) return;
-    const nextPage = currentPage + 1;
-    setSearchLoading(true);
-    try {
-      const res = await searchMovies(lastSearch, nextPage);
-      setSearchResults((prev) => [...prev, ...(res.data.results || [])]);
-      setCurrentPage(nextPage);
-    } catch {
-      // silently fail
-    } finally {
-      setSearchLoading(false);
-    }
-  };
 
   // Skeleton placeholders
   if (loading && displayMovies.length === 0) {
@@ -71,7 +54,7 @@ export default function MovieGrid({ movies, title, emptyMessage }) {
   }
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {title && (
         <Typography variant="h6" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
           {title}
@@ -85,16 +68,37 @@ export default function MovieGrid({ movies, title, emptyMessage }) {
         ))}
       </Grid>
 
-      {/* Load More Button */}
+      {/* Load More Button - Centered Horizontally */}
       {!movies && currentPage < totalPages && (
-        <Box textAlign="center" mt={4}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            mt: 4,
+            mb: 2,
+          }}
+        >
           <Button
             variant="outlined"
-            color="primary"
-            onClick={handleLoadMore}
+            onClick={loadMoreMovies}
             disabled={loading}
-            endIcon={loading ? <CircularProgress size={16} /> : <ExpandMoreIcon />}
+            endIcon={loading ? <CircularProgress size={16} sx={{ color: '#E5A00D' }} /> : <ExpandMoreIcon />}
             size="large"
+            sx={{
+              borderColor: '#E5A00D',
+              color: '#E5A00D',
+              fontWeight: 700,
+              px: 4,
+              py: 1.2,
+              borderRadius: '24px',
+              textTransform: 'none',
+              '&:hover': {
+                borderColor: '#C8880A',
+                bgcolor: 'rgba(229,160,13,0.1)',
+              },
+            }}
           >
             {loading ? 'Loading...' : 'Load More'}
           </Button>

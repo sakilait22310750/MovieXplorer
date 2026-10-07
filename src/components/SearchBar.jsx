@@ -16,6 +16,7 @@ import { useMovie } from '../context/MovieContext';
 export default function SearchBar() {
   const {
     lastSearch, setLastSearch,
+    setSearchParams,
     setSearchResults, setSearchLoading, setSearchError,
     setCurrentPage, setTotalPages,
   } = useMovie();
@@ -73,6 +74,12 @@ export default function SearchBar() {
     setSearchLoading(true);
     setSearchError('');
     setLastSearch(trimmed || 'Filtered Results');
+    setSearchParams({
+      query: trimmed,
+      genre: selectedGenre,
+      year: selectedYear,
+      rating: selectedRating,
+    });
     setOpen(false); // Close suggestions on actual search
 
     try {
@@ -121,6 +128,12 @@ export default function SearchBar() {
     setSuggestions([]);
     setSearchResults([]);
     setLastSearch('');
+    setSearchParams({
+      query: '',
+      genre: '',
+      year: '',
+      rating: '',
+    });
     setSelectedGenre('');
     setSelectedYear('');
     setSelectedRating('');

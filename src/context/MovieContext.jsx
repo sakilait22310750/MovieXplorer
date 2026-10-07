@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { searchMovies, discoverMovies } from '../api/tmdb';
 
 const MovieContext = createContext();
 
@@ -31,6 +32,14 @@ export const MovieProvider = ({ children }) => {
   const [lastSearch, setLastSearch] = useState(
     () => localStorage.getItem('lastSearch') || ''
   );
+
+  // Search parameters for pagination
+  const [searchParams, setSearchParams] = useState({
+    query: '',
+    genre: '',
+    year: '',
+    rating: '',
+  });
 
   // Search results
   const [searchResults, setSearchResults] = useState([]);
@@ -128,6 +137,58 @@ export const MovieProvider = ({ children }) => {
     localStorage.removeItem('currentUser');
   };
 
+  const loadMoreMovies = useCallback(async () => {
+    if (searchLoading || currentPage >= totalPages) return;
+    const nextPage = currentPage + 1;
+    setSearchLoading(true);
+    setSearchError('');
+
+    try {
+      let newResults = [];
+      let totalPgs = totalPages;
+
+      if (searchParams.query) {
+        // Query search
+        const res = await searchMovies(searchParams.query, nextPage);
+        let items = res.data.results || [];
+        totalPgs = res.data.total_pages || 1;
+
+        if (searchParams.genre) {
+          items = items.filter((m) => m.genre_ids?.includes(Number(searchParams.genre)));
+        }
+        if (searchParams.year) {
+          items = items.filter((m) => m.release_date?.startsWith(searchParams.year));
+        }
+        if (searchParams.rating) {
+          items = items.filter((m) => m.vote_average >= Number(searchParams.rating));
+        }
+        newResults = items;
+      } else {
+        // Discover with filters
+        const filters = {};
+        if (searchParams.genre) filters.with_genres = searchParams.genre;
+        if (searchParams.year) filters.primary_release_year = searchParams.year;
+        if (searchParams.rating) filters['vote_average.gte'] = searchParams.rating;
+
+        const res = await discoverMovies(filters, nextPage);
+        newResults = res.data.results || [];
+        totalPgs = res.data.total_pages || 1;
+      }
+
+      setSearchResults((prev) => {
+        const existingIds = new Set(prev.map((m) => m.id));
+        const unique = newResults.filter((m) => !existingIds.has(m.id));
+        return [...prev, ...unique];
+      });
+      setCurrentPage(nextPage);
+      setTotalPages(totalPgs);
+    } catch (err) {
+      setSearchError('Failed to load more movies.');
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [searchLoading, currentPage, totalPages, searchParams]);
+
   return (
     <MovieContext.Provider
       value={{
@@ -138,6 +199,8 @@ export const MovieProvider = ({ children }) => {
         isFavorite,
         lastSearch,
         setLastSearch,
+        searchParams,
+        setSearchParams,
         searchResults,
         setSearchResults,
         searchLoading,
@@ -148,6 +211,7 @@ export const MovieProvider = ({ children }) => {
         setCurrentPage,
         totalPages,
         setTotalPages,
+        loadMoreMovies,
         currentUser,
         register,
         login,
