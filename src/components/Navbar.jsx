@@ -164,7 +164,7 @@ export default function Navbar() {
                       '&:hover': { bgcolor: '#C8880A' },
                     }}
                   >
-                    Sign Up Free
+                    Sign Up
                   </Button>
                 </>
               )}
